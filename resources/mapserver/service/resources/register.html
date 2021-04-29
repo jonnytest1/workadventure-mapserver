@@ -1,0 +1,57 @@
+<html>
+
+    <head>
+
+    </head>
+
+    <body>
+        <form method="POST"
+              action="https://pi4.e6azumuvyiabvs9s.myfritz.net/nodetype/rest/mapserver/register">
+            <table>
+
+                <tr>
+                    <td>
+                        <input name="url"
+                               style="min-width: 600px;">
+                    </td>
+                    <td>
+                        url auf die jeweilige map
+                        Bsp "/_/global/alexbrandad.github.io/testmap-gh-pages-first-test/openbas.json"
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input name="lat"
+                               style="min-width: 600px;">
+                    </td>
+                    <td>
+                        Bsp 49.47021 kann unter <a
+                           href="https://www.latlong.net/convert-address-to-lat-long.html">LatLong.net</a> aus einer
+                        addresse errechnet werden
+                    </td>
+
+                </tr>
+                <tr>
+                    <td>
+                        <input name="lon"
+                               style="min-width: 600px;">
+                    </td>
+                    <td>
+                        Bsp 10.99243
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+
+                    </td>
+                    <td>
+                        <button type="submit">register url at position</button>
+                    </td>
+                </tr>
+            </table>
+        </form>
+
+    </body>
+
+</html>

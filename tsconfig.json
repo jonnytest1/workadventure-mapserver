@@ -1,0 +1,24 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "module": "commonjs",
+        "baseUrl": "./",
+        "moduleResolution": "node",
+        "target": "es6",
+        "emitDecoratorMetadata": true,
+        "useDefineForClassFields": true,
+        "typeRoots": [
+            "node_modules/@types",
+            "customTypes/*"
+        ],
+        "experimentalDecorators": true,
+        "outDir": "compiledjs/shutup",
+        "lib": [
+            "dom",
+            "es6"
+        ]
+    },
+    "include": [
+        "./"
+    ]
+}

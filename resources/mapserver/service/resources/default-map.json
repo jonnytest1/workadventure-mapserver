@@ -1,0 +1,55 @@
+{
+    "compressionlevel": -1,
+    "editorsettings": {
+        "export": {
+            "format": "json",
+            "target": "fire.json"
+        }
+    },
+    "properties": [
+        {
+            "name": "script",
+            "type": "string",
+            "value": "mapscript.js"
+        }
+    ],
+    "infinite": false,
+    "layers": [],
+    "nextlayerid": 10,
+    "nextobjectid": 1,
+    "orientation": "orthogonal",
+    "renderorder": "right-down",
+    "tiledversion": "1.5.0",
+    "tileheight": 32,
+    "tilesets": [
+        {
+            "columns": 23,
+            "firstgid": 1,
+            "image": "assets/control.png",
+            "imageheight": 928,
+            "imagewidth": 736,
+            "margin": 0,
+            "name": "32x32_map_tilev31",
+            "spacing": 0,
+            "tilecount": 667,
+            "tileheight": 32,
+            "tiles": [
+                {
+                    "id": 4,
+                    "properties": [
+                        {
+                            "name": "collides",
+                            "type": "bool",
+                            "value": true
+                        }
+                    ]
+                }
+            ],
+            "tilewidth": 32,
+            "transparentcolor": "#ffef24"
+        }
+    ],
+    "tilewidth": 32,
+    "type": "map",
+    "version": 1.5
+}
