@@ -11,7 +11,7 @@
         "cookie-parser": "^1.4.5",
         "dotenv": "",
         "express": "",
-        "express-hibernate-wrapper": "^1.0.3",
+        "express-hibernate-wrapper": "^1.0.5",
         "express-session": "^1.17.1",
         "express-ws": "^4.0.0",
         "hibernatets": "^1.0.54",
@@ -52,11 +52,11 @@
     "nodemon config test": "diff package.json ./package-cp.json &&     ------- || echo 'running npm install first' && npm install && cp ./package.json ./package-cp.json && node -r ts-node/register",
     "nodemonConfig": {
         "execMap": {
-            "ts": " echo 'package json didnt change' && node -r ts-node/register"
+            "ts": " echo 'reloading nodemon !!!!!!!!!!!!!!!!!!!!!!!!' && node -r ts-node/register"
         },
         "verbose": true,
         "ignore": [
-            "resources/*",
+            "service/resources/*",
             "public/*",
             "package-cp.json",
             "package-lock.json"

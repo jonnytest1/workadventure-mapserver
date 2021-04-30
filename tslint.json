@@ -1,0 +1,190 @@
+{
+    "$schema": "http://json.schemastore.org/tslint",
+    "jsRules": {
+        "quotemark": {
+            "severity": "warn",
+            "options": "single"
+        },
+        "no-consecutive-blank-lines": {
+            "severity": "warn"
+        },
+        "newline-per-chained-call": true,
+        "no-duplicate-super": true,
+        "align": true,
+        "arrow-return-shorthand": true,
+        "class-name": {
+            "severity": "error"
+        },
+        "curly": {
+            "severity": "error"
+        },
+        "cyclomatic-complexity": {
+            "options": 13,
+            "severity": "error"
+        },
+        "max-line-length": {
+            "options": {
+                "limit": 200
+            }
+        },
+        "member-ordering": {
+            "options": {
+                "order": [
+                    "instance-field",
+                    "constructor",
+                    "instance-method",
+                    "static-method"
+                ]
+            }
+        },
+        "new-parens": true,
+        "no-duplicate-switch-case": true,
+        "no-empty": true,
+        "no-invalid-template-strings": true,
+        "no-invalid-this": true,
+        "no-irregular-whitespace": true,
+        "no-return-await": true,
+        "no-shadowed-variable": true,
+        "no-sparse-arrays": true,
+        "no-this-assignment": true,
+        "no-trailing-whitespace": true,
+        "no-unnecessary-callback-wrapper": true,
+        "no-unnecessary-initializer": true,
+        "no-unnecessary-class": {
+            "options": "allow-static-only"
+        },
+        "no-unsafe-finally": true,
+        "no-unused-expression": {
+            "options": "allow-new"
+        },
+        "no-void-expression": {
+            "options": "ignore-arrow-function-shorthand"
+        },
+        "number-literal-format": true,
+        "prefer-method-signature": true,
+        "only-arrow-functions": {
+            "options": "allow-named-functions"
+        },
+        "object-literal-shorthand": false,
+        "ordered-imports": true,
+        "prefer-for-of": true,
+        "prefer-switch": true,
+        "prefer-template": {
+            "severity": "warn",
+            "options": "allow-single-concat"
+        },
+        "prefer-while": true,
+        "promise-function-async": true,
+        "semicolon": true,
+        "switch-default": true,
+        "triple-equals": {
+            "severity": "error"
+        },
+        "typeof-compare": true,
+        "variable-name": {
+            "options": [
+                "check-format",
+                "allow-leading-underscore"
+            ],
+            "severity": "error"
+        },
+        "whitespace": true
+    },
+    "rules": {
+        "quotemark": {
+            "severity": "warn",
+            "options": "single"
+        },
+        "no-consecutive-blank-lines": {
+            "severity": "warn"
+        },
+        "newline-per-chained-call": true,
+        "no-duplicate-super": true,
+        "align": true,
+        "arrow-return-shorthand": true,
+        "class-name": {
+            "severity": "error"
+        },
+        "curly": {
+            "severity": "error"
+        },
+        "cyclomatic-complexity": {
+            "options": 13,
+            "severity": "error"
+        },
+        "indent": {
+            "options": [
+                "spaces",
+                4
+            ],
+            "severity": "warning"
+        },
+        "max-line-length": {
+            "options": {
+                "limit": 200
+            }
+        },
+        "member-ordering": {
+            "options": {
+                "order": [
+                    "instance-field",
+                    "constructor",
+                    "instance-method",
+                    "static-method"
+                ]
+            }
+        },
+        "new-parens": true,
+        "no-duplicate-switch-case": true,
+        "no-empty": true,
+        "no-invalid-template-strings": true,
+        "no-invalid-this": true,
+        "no-irregular-whitespace": true,
+        "no-return-await": true,
+        "no-shadowed-variable": true,
+        "no-sparse-arrays": true,
+        "no-this-assignment": true,
+        "no-trailing-whitespace": true,
+        "no-unnecessary-callback-wrapper": true,
+        "no-unnecessary-initializer": true,
+        "no-unnecessary-class": {
+            "options": "allow-static-only"
+        },
+        "no-unsafe-finally": true,
+        "no-unused-expression": {
+            "options": "allow-new"
+        },
+        "no-void-expression": {
+            "options": "ignore-arrow-function-shorthand"
+        },
+        "number-literal-format": true,
+        "prefer-method-signature": true,
+        "only-arrow-functions": {
+            "options": "allow-named-functions"
+        },
+        "object-literal-shorthand": false,
+        "ordered-imports": true,
+        "prefer-for-of": true,
+        "prefer-switch": true,
+        "prefer-template": {
+            "severity": "warn",
+            "options": "allow-single-concat"
+        },
+        "prefer-while": true,
+        "promise-function-async": true,
+        "semicolon": true,
+        "switch-default": true,
+        "triple-equals": {
+            "severity": "error"
+        },
+        "typeof-compare": true,
+        "variable-name": {
+            "options": [
+                "check-format",
+                "allow-leading-underscore"
+            ],
+            "severity": "error"
+        },
+        "whitespace": true
+    }
+}

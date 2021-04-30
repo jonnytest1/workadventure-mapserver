@@ -1,7 +1,9 @@
+import base64url from 'base64url';
 import { GET, HttpRequest, HttpResponse, Path, POST, ResponseCodeError } from 'express-hibernate-wrapper';
-import { access, promises } from 'fs';
-import { load, save } from 'hibernatets';
-import { type } from 'os';
+import { promises } from 'fs';
+import { load, save, } from 'hibernatets';
+import { DataBaseBase } from 'hibernatets/mariadb-base';
+import { join } from 'path';
 import { v4 as uuid } from 'uuid';
 import { GeoLocation } from './models/location';
 import { Site } from './models/site';
@@ -34,6 +36,8 @@ export class Mapserver {
         const location = site.getLocation();
         site.address = await Mapserver.addressResolver.getAddressFromGeo(location);
         await save(site);
+        new DataBaseBase().sqlquery('DELETE FROM mapcache');
+
         res.send('ok');
         /*if (!countries[site.address.country_code]) {
             const countryData = await Mapserver.addressResolver.getCountryData(location);
@@ -49,37 +53,27 @@ export class Mapserver {
 
     @GET({ path: '' })
     async index(req, res: HttpResponse) {
-        const buffer = await promises.readFile(`${__dirname}/service/resources/register.html`);
-        res.set('Content-Type', 'text/html')
-            .send(buffer);
+        res.redirect('../../../mapserver/register.html');
     }
 
-    @GET({ path: 'cookietest' })
-    async userCookie(req: HttpRequest, res: HttpResponse) {
-        res.set('Access-Control-Allow-Origin', null);
-        let user = await load(User, tUser => tUser.cookie = req.cookies?.user || 'null', undefined, { first: true });
-        if (!user) {
-            user = new User(uuid());
-            await save(user);
-        }
+    @GET('message/:data/message.png')
+    async onmessage(req: HttpRequest, res: HttpResponse) {
+        const data = JSON.parse(base64url.decode(req.params.data));
+        console.log(data);
 
-        res.cookie('user', user.cookie, { expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)) })
-            .send(user);
-    }
-    @GET({ path: 'mapscript.html' })
-    @GET({ path: '/world/mapscript.html' })
-    @GET({ path: ':_/lat/:_/lon/:_/mapscript.html' })
-    async getMapHtml(req, res) {
-        const buffer = await promises.readFile(`${__dirname}/service/resources/mapscript.html`);
+        const jsonStr = JSON.stringify({ ...data, res: 123, user: req.user });
         res.set('Content-Type', 'text/html')
-            .send(buffer);
+            .send(`<script>const jsonV=${jsonStr};window.parent.postMessage({data:jsonV,type:"iframeresponse"},"*")</script>`);
     }
+
     @GET({ path: 'mapscript.js' })
     @GET({ path: '/world/mapscript.js' })
     @GET({ path: ':_/lat/:_/lon/:_/mapscript.js' })
-    async getMapScript(req, res: HttpResponse) {
-        let buffer = await promises.readFile(`${__dirname}/service/resources/mapscript.js`, { encoding: 'utf8' });
-        let user = await load(User, tUser => tUser.cookie = req.cookies?.user || 'null', undefined, { first: true });
+    async getMapScript(req: HttpRequest<User>, res: HttpResponse) {
+        const resource = join(__dirname, '../../public/mapscript.js');
+
+        let buffer = await promises.readFile(resource, { encoding: 'utf8' });
+        let user = req.user;
         if (!user) {
             user = new User(uuid());
             await save(user);
@@ -119,7 +113,9 @@ export class Mapserver {
         if (path.includes('..') || path.includes('/')) {
             throw new ResponseCodeError(403, '');
         }
-        const buffer = await promises.readFile(`${__dirname}/service/resources/${path}`);
+        const resource = join(__dirname, `../../public/`, path);
+
+        const buffer = await promises.readFile(resource);
         res.set('Content-Type', 'image/png')
             .send(buffer);
     }
@@ -138,7 +134,7 @@ export class Mapserver {
         });
 
         const pixel = new SitesAdder(new MapResolver()).getFirstTilePixelWithMultipleSites(sites);
-        console.log(`${pixel.zoom} - ${pixel.lon} - ${pixel.lat}`);
+        //console.log(`${pixel.zoom} - ${pixel.lon} - ${pixel.lat}`);
         const topLevelJsonString = await new MapResolver(pixel.zoom, pixel.lon, pixel.lat).getWorldMapJson();
         res.set('Content-Type', 'application/json')
             .send(topLevelJsonString);
@@ -153,18 +149,6 @@ export class Mapserver {
         }
         let zoom = +req.params.zoom;
         zoom = Math.min(18, zoom);
-        /*
-        const previousZoom = zoom - MapResolver.zoomIncrement;
-           const amountOfIndicesInPreviousZoom = MapResolver.getAmountOfIndicesForZoom(previousZoom);
-           const amountOFIndicesInCurrentZoom = MapResolver.getAmountOfIndicesForZoom(zoom);
-
-           const layerOffset = 1;
-           const unscaledX = (543 - layerOffset) / amountOfIndicesInPreviousZoom;
-           const unscaledY = (350 - layerOffset) / amountOfIndicesInPreviousZoom;
-
-           const startTilex = Math.round(unscaledX * amountOFIndicesInCurrentZoom / MapResolver.indexesPerTile);
-           const startTileY = Math.round(unscaledY * amountOFIndicesInCurrentZoom / MapResolver.indexesPerTile);*/
-
         const mapReolver = new MapResolver(zoom, +req.params.tileX, +req.params.tileY, MapAttributes.layerSizePerMap);
         const worldMapJsonString = await mapReolver.getWorldMapJson();
         res.set('Content-Type', 'application/json')

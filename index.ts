@@ -1,21 +1,29 @@
-import { config } from 'dotenv';
-import { initialize } from 'express-hibernate-wrapper';
-import * as session from 'express-session';
-import { updateDatabase } from 'hibernatets';
-import passport = require('passport');
-import * as auth from './credentials/auth';
-const hbs = require('hbs');
 import * as cookieParser from 'cookie-parser';
+import { config } from 'dotenv';
+import { HttpRequest, initialize } from 'express-hibernate-wrapper';
+import { load, updateDatabase } from 'hibernatets';
+import { User } from './resources/mapserver/models/user';
 config({
     path: __dirname + '/.env'
 });
 
 updateDatabase(__dirname + '/resources/mapserver/models')
     .then(() => {
+
         initialize(__dirname + '/resources', {
             allowCors: true,
             prereesources: app => {
                 app.use(cookieParser());
+                app.use(async (req: any, res, next) => {
+                    if (!req.user && req.cookies.user) {
+                        try {
+                            req.user = await load(User, u => u.cookie = req.cookies.user, undefined, { first: true });
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    next();
+                });
             },
             public: __dirname + '/public'
         })

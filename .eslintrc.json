@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json.schemastore.org/eslintrc",
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "ecmaFeatures": {},
+  "settings": {},
+  "plugins": [
+    "jsdoc",
+    "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "rules": {
+    "no-unused-vars": 1,
+    "semi": 2,
+    "no-debugger": 0,
+    "no-console": 0,
+    "no-global-assign": 0,
+    "function-paren-newline": [
+      "never"
+    ]
+  }
+}

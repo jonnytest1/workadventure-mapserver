@@ -1,31 +1,31 @@
 
-type Postion = {
+export type Position = {
     x: number;
     y: number;
 };
 
-type ApiUser = {
+export type ApiUser = {
     name: string;
-    position: Postion;
+    position: Position;
     joinedAt: string;
-
+    jitsiRoom: string
 };
 
-interface RoomMap {
+export interface RoomMap {
     [room: string]: {
         slug: string,
         users: Array<ApiUser>
     };
 }
 
-interface RoomObj {
+export interface RoomObj {
     roomSlug: string;
     users: { [indx: string]: UserObj };
 }
 
-type RoomDump = { [index: string]: RoomObj };
+export type RoomDump = { [index: string]: RoomObj };
 
-interface UserObj {
+export interface UserObj {
     roomId: string;
     name: string;
     position: {
@@ -43,7 +43,7 @@ interface UserObj {
 
 
 
-interface MapJson {
+export interface MapJson {
     layers: Array<{
         properties: Array<{
             name: string,

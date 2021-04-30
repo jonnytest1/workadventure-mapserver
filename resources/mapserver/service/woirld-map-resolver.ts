@@ -4,8 +4,8 @@ import { GeoLocation } from '../models/location';
 import { MapCache } from '../models/map-cache';
 import { TilePixel } from '../models/tile-pixel';
 import { Vector } from '../models/vector';
+import { MapJson } from './map';
 import { MapAttributes } from './map-attributes-holder';
-import { MapJson } from './resources/map';
 import { SitesAdder } from './site-adder';
 
 const cachingEnabled = false;

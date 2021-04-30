@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "Fira Code",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.tslint": true,
+        "source.fixAll.eslint": true
+    },
+}

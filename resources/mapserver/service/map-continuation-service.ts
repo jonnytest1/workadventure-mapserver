@@ -1,4 +1,4 @@
-import { MapJson } from './resources/map';
+import { MapJson } from './map';
 import { exitTileIndex, MapResolver, startTileIndex } from './woirld-map-resolver';
 export class MapContinuationService {
     layerAmount: number;

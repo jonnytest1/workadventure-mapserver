@@ -5,8 +5,8 @@ import { Site } from '../models/site';
 import { SiteTilePosition } from '../models/site-tile-position';
 import { TilePixel } from '../models/tile-pixel';
 import { Vector } from '../models/vector';
+import { MapJson } from './map';
 import { MapAttributes } from './map-attributes-holder';
-import { MapJson } from './resources/map';
 import { MapResolver } from './woirld-map-resolver';
 const houseIndex = 1;
 const cityIconIndex = 2;
@@ -136,10 +136,10 @@ export class SitesAdder extends MapAttributes {
             tilePixelArray.push(site);
         }
 
-        for (const entry of siteMap.keys()) {
-            console.log(entry, siteMap.get(entry)
-                .map(site => site.url));
-        }
+        /* for (const entry of siteMap.keys()) {
+             console.log(entry, siteMap.get(entry)
+                 .map(site => site.url));
+         }*/
         return siteMap;
     }
 
