@@ -23,8 +23,12 @@ export class ApiProxy {
                 };
 
                 if (!ApiProxy.roomJsons[room]) {
-                    const response = await fetch('https://' + room.replace('_/global/', ''));
-                    ApiProxy.roomJsons[room] = await response.json();
+                    const finalMapUrl = 'https://' + room.replace('_/global/', '');
+                    if (!finalMapUrl.includes('localhost')) {
+                        const response = await fetch(finalMapUrl);
+                        ApiProxy.roomJsons[room] = await response.json();
+                    }
+
                 }
             }
 
@@ -67,6 +71,10 @@ export class ApiProxy {
         }
         const playerX = position.x / 32;
         const playery = position.y / 32;
+
+        if (!ApiProxy.roomJsons[room]) {
+            return 'invalidmapref'
+        }
 
         for (const layer of ApiProxy.roomJsons[room].layers) {
             if (!layer.properties) {

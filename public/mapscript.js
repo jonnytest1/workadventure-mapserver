@@ -22,7 +22,7 @@ async function message(data) {
                 img.remove();
             }
         };
-        img.src = `https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/mapserver/message/${btoa(JSON.stringify(data))}/message.png`;
+        img.src = `https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/message/${btoa(JSON.stringify(data))}/message.png`;
         document.body.appendChild(img);
     });
 }

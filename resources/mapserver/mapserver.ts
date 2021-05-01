@@ -1,4 +1,4 @@
-import base64url from 'base64url';
+
 import { GET, HttpRequest, HttpResponse, Path, POST, ResponseCodeError } from 'express-hibernate-wrapper';
 import { promises } from 'fs';
 import { load, save, } from 'hibernatets';
@@ -54,16 +54,6 @@ export class Mapserver {
     @GET({ path: '' })
     async index(req, res: HttpResponse) {
         res.redirect('../../../mapserver/register.html');
-    }
-
-    @GET('message/:data/message.png')
-    async onmessage(req: HttpRequest, res: HttpResponse) {
-        const data = JSON.parse(base64url.decode(req.params.data));
-        console.log(data);
-
-        const jsonStr = JSON.stringify({ ...data, res: 123, user: req.user });
-        res.set('Content-Type', 'text/html')
-            .send(`<script>const jsonV=${jsonStr};window.parent.postMessage({data:jsonV,type:"iframeresponse"},"*")</script>`);
     }
 
     @GET({ path: 'mapscript.js' })
