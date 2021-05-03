@@ -30,6 +30,9 @@ export class User {
     @column({ type: 'boolean' })
     adminPrivileges: boolean;
 
+    @column({ type: 'boolean' })
+    gameModeEnabled: boolean;
+
     constructor(cookie?) {
         this.cookie = cookie;
     }

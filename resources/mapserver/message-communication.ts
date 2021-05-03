@@ -43,8 +43,13 @@ export class MessageCommunciation {
                 return;
             }
             const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
+
             if (responseJson !== undefined) {
-                ws.send(responseJson);
+                ws.send(JSON.stringify({
+                    data: responseJson,
+                    type: 'websocketresponse',
+                    uuid: data.uuid || undefined
+                }));
             }
         };
     }

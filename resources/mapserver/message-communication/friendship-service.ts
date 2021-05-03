@@ -65,7 +65,7 @@ export class FriendshipService {
             deep: {
                 friends: 'TRUE=TRUE',
                 friendedUser: {
-                    depths: 4,
+                    depths: 6,
                     filter: 'TRUE=TRUE'
                 }
             }

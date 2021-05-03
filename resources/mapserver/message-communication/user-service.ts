@@ -17,6 +17,16 @@ export class UserService {
     userUpdate(data: UserUpdateEvent, req: HttpRequest<User>) {
         req.user.nickName = data.nickName;
         req.user.pusherUuid = data.uuid;
-        return 5;
+    }
+
+    enableGameMode(data: unknown, req: HttpRequest<User>) {
+        req.user.gameModeEnabled = true;
+    }
+
+    getUserData(data: unknown, req: HttpRequest<User>) {
+        return {
+            gameModeEnabled: req.user.gameModeEnabled,
+            deathCount: req.user.deathCount,
+        };
     }
 }
