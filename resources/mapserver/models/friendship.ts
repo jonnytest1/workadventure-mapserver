@@ -13,4 +13,5 @@ export class FriendShip {
     @mapping(Mappings.OneToOne, import('./user')
         .then(u => u.User), u => u.id)
     friendedUser: UserRef;
+
 }

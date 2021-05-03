@@ -7,13 +7,17 @@ export class ApiProxy {
 
     @GET('/users')
     async getUsers(req: HttpRequest, res: HttpResponse) {
-        const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + req.query.apikey);
-        const dump = await response.json();
-        const userMap = await this.getUsersFromDump(dump);
+        const userMap = await this.getUserMap();
         res.send(userMap);
     }
 
-    async getUsersFromDump(dump): Promise<RoomMap> {
+    async getUserMap(containsIds = false) {
+        const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+        const dump = await response.json();
+        return this.getUsersFromDump(dump, containsIds);
+    }
+
+    async getUsersFromDump(dump, containsIds): Promise<RoomMap> {
         const roomMap: RoomMap = {};
         for (let room in dump) {
             if (!roomMap[room]) {
@@ -34,13 +38,13 @@ export class ApiProxy {
 
             for (let index in dump[room].users) {
                 const dumpUser = dump[room].users[index];
-                this.parseUser(dumpUser, roomMap[room].users, room);
+                this.parseUser(dumpUser, roomMap[room].users, room, containsIds);
             }
         }
         return roomMap;
     }
 
-    parseUser(user: UserObj, userList: Array<ApiUser>, room: string) {
+    parseUser(user: UserObj, userList: Array<ApiUser>, room: string, containsIds: boolean) {
         if (typeof user === 'string') {
             return;
         }
@@ -48,7 +52,9 @@ export class ApiProxy {
             name: user.name,
             joinedAt: user.joinedAt,
             position: user.position,
-            jitsiRoom: this.getJitsiKeyForPosition(room, user.position)
+            jitsiRoom: this.getJitsiKeyForPosition(room, user.position),
+            uuid: containsIds ? user.uuid : undefined
+
         });
         if (user.positionNotifier && user.positionNotifier.zones) {
             for (let zoneTop of user.positionNotifier.zones) {
@@ -56,7 +62,7 @@ export class ApiProxy {
                     for (let zoneInner of zoneTop) {
                         if (zoneInner && zoneInner.things) {
                             for (const thing of zoneInner.things) {
-                                this.parseUser(thing, userList, room);
+                                this.parseUser(thing, userList, room, containsIds);
                             }
                         }
                     }
@@ -73,7 +79,7 @@ export class ApiProxy {
         const playery = position.y / 32;
 
         if (!ApiProxy.roomJsons[room]) {
-            return 'invalidmapref'
+            return 'invalidmapref';
         }
 
         for (const layer of ApiProxy.roomJsons[room].layers) {

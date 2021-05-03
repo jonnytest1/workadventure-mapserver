@@ -9,6 +9,11 @@ export class User {
 
     @column()
     cookie: string;
+    @column()
+    pusherUuid: string;
+
+    @column()
+    nickName: string;
 
     @column()
     shownCookieHint = false;
@@ -16,8 +21,14 @@ export class User {
     @column({ type: 'number' })
     readyForFriends: number;
 
+    @column({ type: 'number' })
+    deathCount: number = 0;
+
     @mapping(Mappings.OneToMany, FriendShip, 'originalUser')
     friends: Array<FriendShip> = [];
+
+    @column({ type: 'boolean' })
+    adminPrivileges: boolean;
 
     constructor(cookie?) {
         this.cookie = cookie;

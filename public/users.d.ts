@@ -9,6 +9,7 @@ export type ApiUser = {
     position: Position;
     joinedAt: string;
     jitsiRoom: string
+    uuid?: string
 };
 
 export interface RoomMap {
@@ -39,6 +40,8 @@ export interface UserObj {
             things: Array<UserObj>;
         }>>;
     };
+
+    uuid: string
 }
 
 

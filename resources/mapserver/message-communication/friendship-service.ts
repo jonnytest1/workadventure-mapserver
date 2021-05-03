@@ -1,12 +1,26 @@
 import { HttpRequest } from 'express-hibernate-wrapper';
 import { load } from 'hibernatets';
-import { MessageHandlerRegistration } from '../message-communication';
+import { Position } from '../../../public/users';
+import { ApiProxy } from '../api.proxy';
+import { MessageCommunciation, MessageHandlerRegistration } from '../message-communication';
 import { FriendShip } from '../models/friendship';
 import { User } from '../models/user';
 
+interface FriendMap {
+    [nickname: string]: {
+        status: 'offline' | 'online',
+        index: number
+        position?: Position,
+        room?: string
+        jitsiRoom?: string,
+        joinedAt?: string,
+    };
+}
+
+const apiProxy = new ApiProxy();
 @MessageHandlerRegistration
 export class FriendshipService {
-    async friendscheck(data: any, req: HttpRequest<User>) {
+    async friendscheck(data: unknown, req: HttpRequest<User>) {
         const currentUserId = +req.user.id;
         const friendships = await load(FriendShip, 'originalUser = ?', [currentUserId], {
             deep: {
@@ -16,14 +30,37 @@ export class FriendshipService {
         if (req.user.readyForFriends) {
             req.user.readyForFriends = Math.floor(Date.now() + (1000 * 10) / 1000);
         }
-        return friendships.map(friendship => friendship.friendedUser.id);
+        return friendships.map(friendship => friendship.friendedUser.nickName);
     }
 
-    async friendstatus(data, req: HttpRequest<User>) {
-        return [];
+    async friendstatus(data, req: HttpRequest<User>): Promise<FriendMap> {
+        const map = await apiProxy.getUserMap(true);
+
+        const friiendMap: FriendMap = {};
+        req.user.friends.forEach((friend, index) => {
+            friiendMap[friend.friendedUser.nickName] = {
+                status: 'offline',
+                index: index + 1
+            };
+        });
+        for (let room in map) {
+            const roomData = map[room];
+
+            for (let user of roomData.users) {
+                const friend = req.user.friends.find(friendShip => friendShip.friendedUser.pusherUuid === user.uuid);
+                if (friend) {
+                    friiendMap[user.name].position = user.position;
+                    friiendMap[user.name].jitsiRoom = user.jitsiRoom;
+                    friiendMap[user.name].joinedAt = user.joinedAt;
+                    friiendMap[user.name].status = 'online';
+                    friiendMap[user.name].room = room;
+                }
+            }
+        }
+        return friiendMap;
     }
 
-    async readyfriendship(data: any, req: HttpRequest<User>) {
+    async readyfriendship(data: unknown, req: HttpRequest<User>) {
         const readyUsers = await load(User, 'readyForFriends > ? ', [Math.floor(Date.now() / 1000)], {
             deep: {
                 friends: 'TRUE=TRUE',
@@ -47,7 +84,7 @@ export class FriendshipService {
                 const friendshipCurrentUser = new FriendShip();
                 friendshipCurrentUser.friendedUser = user;
                 req.user.friends.push(friendshipCurrentUser);
-                newFriends.push(user.id);
+                newFriends.push(user.nickName);
             }
 
         }
@@ -55,13 +92,42 @@ export class FriendshipService {
         return {
             new: newFriends,
             friends: req.user.friends.map(friend => {
-                return friend.friendedUser.id;
+                return friend.friendedUser.nickName;
             })
         };
 
     }
-    unreadyfriendship(data: any, req: HttpRequest<User>) {
+    unreadyfriendship(data: unknown, req: HttpRequest<User>) {
         req.user.readyForFriends = null;
     }
 
+    async chatmessage(data: { message: string }, req: HttpRequest<User>, ws) {
+        const messageParts = data.message.trim()
+            .split(' ');
+        const index = messageParts.shift();
+        const message = messageParts.join(' ');
+        if (index === 'global') {
+            if (req.user.adminPrivileges) {
+                for (let i in MessageCommunciation.websockets) {
+                    MessageCommunciation.websockets[i].send(JSON.stringify({
+                        type: 'receivemessage',
+                        author: req.user.nickName + ' - global',
+                        message: message
+                    }));
+
+                }
+            }
+        } else {
+            const friendId = req.user.friends[+index - 1].friendedUser.id;
+            if (MessageCommunciation.websockets[friendId]) {
+                MessageCommunciation.websockets[friendId].send(JSON.stringify({
+                    type: 'receivemessage',
+                    author: req.user.nickName,
+                    message: message
+                }));
+
+            }
+        }
+
+    }
 }

@@ -1,5 +1,5 @@
 
-///<reference path="wa.d.ts" />
+///<reference path="../../workadventure-map-starter-kit/workadventuremap/scripts/index.d.ts" />
 
 /**
  * @type {import("../resources/mapserver/models/user").User}
@@ -9,22 +9,34 @@
 const cookieContent = $COOKIE_CONTENT$;
 
 /**
- *
- * @param {any} data
- *
+ * @template {keyof msgCpy} T
+ * @param {{
+ *      type:T,
+ *      data?:msgCpy[T]["param"]
+ * }} data
+ * @returns {Promise<msgCpy[T]["response"]>}
  */
 async function message(data) {
-    return new Promise((resolv, thrower) => {
+    /**
+     * @type {Promise<msgCpy[T]["response"]>}
+     */
+    const pr = new Promise((resolv, thrower) => {
         const img = document.createElement('iframe');
         window.onmessage = (messageEvent) => {
-            if(messageEvent.data.type === 'iframeresponse') {
-                resolv(messageEvent.data.data);
+            /**
+             * @type {{type:"iframeresponse",data:msgCpy[T]["response"]}}
+             */
+            let eventData = messageEvent.data;
+            if(eventData.type === 'iframeresponse') {
+                resolv(eventData.data);
                 img.remove();
             }
         };
         img.src = `https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/message/${btoa(JSON.stringify(data))}/message.png`;
         document.body.appendChild(img);
     });
+
+    return pr;
 }
 
 /*message({ test: "hallo" }).then(data => {
@@ -40,4 +52,19 @@ setTimeout(() => {
         WA.sendChatMessage('you can register your own map in the game menu', 'map registration');
         WA.sendChatMessage('to go one level up there is an icon at the bottom right of each map !!!', 'map registration');
     }
-}, 100);
+
+}, 1000);
+
+addEventListener('load', () => {
+    setTimeout(async () => {
+        const state = await WA.getGameState();
+        await message({
+            type: 'userUpdate',
+            data: {
+                uuid: state.uuid,
+                nickName: state.nickName
+            }
+        });
+    }, 2000);
+
+});

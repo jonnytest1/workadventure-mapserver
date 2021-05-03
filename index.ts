@@ -10,7 +10,6 @@ config({
 
 updateDatabase(__dirname + '/resources/mapserver/models')
     .then(() => {
-
         initialize(__dirname + '/resources', {
             allowCors: true,
             prereesources: app => {
