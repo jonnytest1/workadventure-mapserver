@@ -22,9 +22,9 @@ export class Mapserver {
     @POST({ path: 'register' })
     async registerGitHub(req: HttpRequest, res: HttpResponse) {
 
-        if (!req.body.url.endsWith('.json')) {
+        /*if (!req.body.url.endsWith('.json')&&req.body.url) {
             throw new ResponseCodeError(400, 'url needs to be a json');
-        }
+        }*/
         if (isNaN(+req.body.lat) || isNaN(+req.body.lon)) {
             throw new ResponseCodeError(400, 'positions need to be a number');
         }

@@ -163,7 +163,17 @@ export class MapResolver extends MapAttributes {
 
         this.defaultJson.layers.push({
             draworder: 'topdown',
-            objects: [],
+            objects: [{
+                'height': 50,
+                'id': 99,
+                'name': 'first-start-popup',
+                'rotation': 0,
+                'type': '',
+                'visible': true,
+                'width': 100,
+                'x': Math.floor(this.indexesInCompleteRow / 2),
+                'y': Math.floor(this.indexesInCompleteRow / 2)
+            }],
             opacity: 1,
             name: 'floorLayer',
             id: 30000,

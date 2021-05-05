@@ -33,6 +33,9 @@ export class User {
     @column({ type: 'boolean' })
     gameModeEnabled: boolean;
 
+    @column({ type: 'boolean' })
+    autoOpenGameOverlay: boolean;
+
     constructor(cookie?) {
         this.cookie = cookie;
     }

@@ -1,6 +1,6 @@
 import * as cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
-import { HttpRequest, initialize } from 'express-hibernate-wrapper';
+import { initialize } from 'express-hibernate-wrapper';
 import { load, save, updateDatabase } from 'hibernatets';
 import { v4 as uuid } from 'uuid';
 import { User } from './resources/mapserver/models/user';
@@ -30,7 +30,9 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                         } catch (e) {
                             console.error(e);
                         }
-                    } else if (!req.cookies.user) {
+                    }
+
+                    if (!req.user) {
                         req.user = new User(uuid());
                         await save(req.user);
                         res.cookie('user', req.user.cookie, {

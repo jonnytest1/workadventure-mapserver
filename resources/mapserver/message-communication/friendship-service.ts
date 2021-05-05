@@ -28,7 +28,7 @@ export class FriendshipService {
             }
         });
         if (req.user.readyForFriends) {
-            req.user.readyForFriends = Math.floor(Date.now() + (1000 * 10) / 1000);
+            req.user.readyForFriends = Math.floor((Date.now() + (1000 * 10)) / 1000);
         }
         return friendships.map(friendship => friendship.friendedUser.nickName);
     }
@@ -88,7 +88,7 @@ export class FriendshipService {
             }
 
         }
-        req.user.readyForFriends = Math.floor(Date.now() + (1000 * 10) / 1000);
+        req.user.readyForFriends = Math.floor((Date.now() + (1000 * 10)) / 1000);
         return {
             new: newFriends,
             friends: req.user.friends.map(friend => {

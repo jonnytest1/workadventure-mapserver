@@ -2,7 +2,9 @@ import base64url from 'base64url';
 import { GET, HttpRequest, HttpResponse, WS } from 'express-hibernate-wrapper/';
 import { User } from './models/user';
 
-const messageHandlers: { [eventType: string]: (data: any, req: HttpRequest, ws?) => any } = {};
+const messageHandlers: { [eventType: string]: (data: any, req: HttpRequest, ws?) => any } = {
+    cookie: () => true
+};
 
 export function MessageHandlerRegistration(constructor: new () => any) {
     const messageHandler = new constructor();
@@ -38,18 +40,23 @@ export class MessageCommunciation {
         };
 
         ws.onmessage = async message => {
-            const data = JSON.parse(message.data);
-            if (data.type === '__proto__') {
-                return;
-            }
-            const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
+            try {
+                console.log('received', message.data);
+                const data = JSON.parse(message.data);
+                if (data.type === '__proto__') {
+                    return;
+                }
+                const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
 
-            if (responseJson !== undefined) {
-                ws.send(JSON.stringify({
-                    data: responseJson,
-                    type: 'websocketresponse',
-                    uuid: data.uuid || undefined
-                }));
+                if (responseJson !== undefined) {
+                    ws.send(JSON.stringify({
+                        data: responseJson,
+                        type: 'websocketresponse',
+                        uuid: data.uuid || undefined
+                    }));
+                }
+            } catch (e) {
+                console.error(e);
             }
         };
     }

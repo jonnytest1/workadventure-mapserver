@@ -10,6 +10,11 @@
         {
             "name": "script",
             "type": "string",
+            "value": "https://jonnytest1.github.io/workadventuremap/scripts/index.js?url=./user-update.js,./game-mode.js"
+        },
+        {
+            "name": "script",
+            "type": "string",
             "value": "mapscript.js"
         }
     ],
