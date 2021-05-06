@@ -82,6 +82,9 @@ export class ApiProxy {
             return 'invalidmapref';
         }
 
+        if (!(ApiProxy.roomJsons[room].layers instanceof Array)) {
+            console.log('layers is no array');
+        }
         for (const layer of ApiProxy.roomJsons[room].layers) {
             if (!layer.properties) {
                 continue;

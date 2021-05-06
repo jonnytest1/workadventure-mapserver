@@ -33,7 +33,7 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                     }
 
                     if (!req.user) {
-                        if (req.method !== 'GET' || req.path.endsWith('.json')) {
+                        if (req.method !== 'GET' || req.path.endsWith('.js') || req.path.endsWith('/message.html')) {
                             req.user = new User(uuid());
                             await save(req.user);
                             res.cookie('user', req.user.cookie, {

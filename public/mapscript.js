@@ -1,19 +1,15 @@
 
 ///<reference path="../../jonny-maps/scripts/index.d.ts" />
 
-/**
- * @type {import("../resources/mapserver/models/user").User}
- */
+setTimeout(async () => {
+    //@ts-ignore
+    const [{ getUserData }, { message }] = await Promise.all([require('./game/user-data.js'), require('./backend-connection')]);
 
-// @ts-ignore
-const cookieContent = $COOKIE_CONTENT$;
-
-setTimeout(() => {
     WA.registerMenuCommand('Register your own map -basintern', () => {
         WA.openTab('https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/register.html');
     });
-
-    if(!cookieContent.shownCookieHint) {
+    const userData = await getUserData();
+    if(!userData.shownCookieHint) {
         setTimeout(() => {
             console.log('disabled');
             WA.sendChatMessage('you can register your own map in the game menu', 'map registration');
@@ -31,5 +27,11 @@ setTimeout(() => {
             }, 3000);
             //
         }, 2000);
+        message({
+            type: 'userUpdate',
+            data: {
+                shownCookieHint: true
+            }
+        });
     }
 }, 1000);

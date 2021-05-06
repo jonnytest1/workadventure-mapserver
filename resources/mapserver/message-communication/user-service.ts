@@ -18,7 +18,7 @@ export class UserService {
     }
 
     userUpdate(data: UserUpdateEvent & Object, req: HttpRequest<User>) {
-        for (let property of ['nickName', 'uuid', 'autoOpenGameOverlay']) {
+        for (let property of ['nickName', 'uuid', 'autoOpenGameOverlay', 'shownCookieHint']) {
             if (data.hasOwnProperty(property)) {
                 req.user[property] = data[property];
             }
@@ -35,7 +35,8 @@ export class UserService {
             deathCount: req.user.deathCount,
             friends: await new FriendshipService().friendstatus(null, req),
             isAdmin: req.user.adminPrivileges,
-            autoOpenGameOverlay: req.user.autoOpenGameOverlay
+            autoOpenGameOverlay: req.user.autoOpenGameOverlay,
+            shownCookieHint: req.user.shownCookieHint
         };
     }
 }

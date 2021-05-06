@@ -1,10 +1,9 @@
 
 import { GET, HttpRequest, HttpResponse, Path, POST, ResponseCodeError } from 'express-hibernate-wrapper';
 import { promises } from 'fs';
-import { load, save, } from 'hibernatets';
+import { load, save } from 'hibernatets';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { join } from 'path';
-import { v4 as uuid } from 'uuid';
 import { GeoLocation } from './models/location';
 import { Site } from './models/site';
 import { Tile } from './models/tile';
@@ -63,21 +62,8 @@ export class Mapserver {
         const resource = join(__dirname, '../../public/mapscript.js');
 
         let buffer = await promises.readFile(resource, { encoding: 'utf8' });
-        let user = req.user;
-        if (!user) {
-            user = new User(uuid());
-            await save(user);
-        } else {
-            user.shownCookieHint = true;
-        }
-        buffer = buffer.replace('$COOKIE_CONTENT$', JSON.stringify(user));
+
         res.set('Content-Type', 'application/javascript')
-            .cookie('user', user.cookie, {
-                expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none'
-            })
             .send(buffer);
     }
 
