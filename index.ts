@@ -1,6 +1,6 @@
 import * as cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
-import { initialize } from 'express-hibernate-wrapper';
+import { HttpRequest, initialize } from 'express-hibernate-wrapper';
 import { load, save, updateDatabase } from 'hibernatets';
 import { v4 as uuid } from 'uuid';
 import { User } from './resources/mapserver/models/user';
@@ -14,7 +14,7 @@ updateDatabase(__dirname + '/resources/mapserver/models')
             allowCors: true,
             prereesources: app => {
                 app.use(cookieParser());
-                app.use(async (req: any, res, next) => {
+                app.use(async (req: HttpRequest, res, next) => {
                     if (!req.user && req.cookies.user) {
                         try {
                             req.user = await load(User, u => u.cookie = req.cookies.user, undefined, {
@@ -33,14 +33,20 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                     }
 
                     if (!req.user) {
-                        req.user = new User(uuid());
-                        await save(req.user);
-                        res.cookie('user', req.user.cookie, {
-                            expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
-                            httpOnly: true,
-                            secure: true,
-                            sameSite: 'none'
-                        });
+                        if (req.method !== 'GET' || req.path.endsWith('.json')) {
+                            req.user = new User(uuid());
+                            await save(req.user);
+                            res.cookie('user', req.user.cookie, {
+                                expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
+                                httpOnly: true,
+                                secure: true,
+                                sameSite: 'none'
+                            });
+                        } else {
+                            if (!req.path.endsWith('.png')) {
+                                console.log(`didnt set cookies for ${req.path}`);
+                            }
+                        }
                     }
                     next();
                 });

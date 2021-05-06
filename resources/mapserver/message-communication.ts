@@ -22,7 +22,7 @@ export class MessageCommunciation {
 
     static websockets: { [uuid: string]: any } = {};
 
-    @GET('message/:data/message.png')
+    @GET('message/:data/message.html')
     async onmessage(req: HttpRequest, res: HttpResponse) {
         const data = JSON.parse(base64url.decode(req.params.data));
         console.log(data.type);
@@ -38,7 +38,9 @@ export class MessageCommunciation {
         ws.onclose = () => {
             delete this.websockets[userId];
         };
-
+        ws.onerror = e => {
+            console.error(e);
+        };
         ws.onmessage = async message => {
             try {
                 console.log('received', message.data);
@@ -49,6 +51,7 @@ export class MessageCommunciation {
                 const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
 
                 if (responseJson !== undefined) {
+                    console.log('returning', responseJson, message.data);
                     ws.send(JSON.stringify({
                         data: responseJson,
                         type: 'websocketresponse',
