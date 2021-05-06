@@ -5,6 +5,15 @@ export class ApiProxy {
 
     static roomJsons: { [room: string]: MapJson } = {};
 
+    static apiCache = null;
+
+    constructor() {
+        setInterval(async () => {
+            const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+            ApiProxy.apiCache = await response.json();
+        }, 1000);
+    }
+
     @GET('/users')
     async getUsers(req: HttpRequest, res: HttpResponse) {
         const userMap = await this.getUserMap();
@@ -12,9 +21,8 @@ export class ApiProxy {
     }
 
     async getUserMap(containsIds = false) {
-        const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
-        const dump = await response.json();
-        return this.getUsersFromDump(dump, containsIds);
+
+        return this.getUsersFromDump(ApiProxy.apiCache, containsIds);
     }
 
     async getUsersFromDump(dump, containsIds): Promise<RoomMap> {

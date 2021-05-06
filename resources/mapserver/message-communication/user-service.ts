@@ -3,12 +3,23 @@ import { MessageHandlerRegistration } from '../message-communication';
 import { User } from '../models/user';
 import { FriendshipService } from './friendship-service';
 
-export interface UserUpdateEvent {
+const properties = ['nickName', 'pusherUuid', 'autoOpenGameOverlay', 'shownCookieHint'] as const;
+
+type userProsp<T extends ReadonlyArray<keyof User>> = T;
+
+type TypeSafeUserProperties = userProsp<typeof properties>;
+export type UserUpdateEvent = Partial<{
+    [K in TypeSafeUserProperties[number]]: User[K]
+}>;
+
+/*extends { [key: keyof User] : any } {
     nickName?: string;
     uuid?: string;
 
+    shownCookieHint?: boolean;
+
     autoOpenGameOverlay?: boolean;
-}
+}*/
 
 @MessageHandlerRegistration
 export class UserService {
@@ -18,9 +29,11 @@ export class UserService {
     }
 
     userUpdate(data: UserUpdateEvent & Object, req: HttpRequest<User>) {
-        for (let property of ['nickName', 'uuid', 'autoOpenGameOverlay', 'shownCookieHint']) {
+
+        for (let property of properties) {
+            const prop: string = property;
             if (data.hasOwnProperty(property)) {
-                req.user[property] = data[property];
+                req.user[prop] = data[prop];
             }
         }
     }
@@ -33,7 +46,7 @@ export class UserService {
         return {
             gameModeEnabled: req.user.gameModeEnabled,
             deathCount: req.user.deathCount,
-            friends: await new FriendshipService().friendstatus(null, req),
+            friends: await new FriendshipService().friendstatus(undefined, req),
             isAdmin: req.user.adminPrivileges,
             autoOpenGameOverlay: req.user.autoOpenGameOverlay,
             shownCookieHint: req.user.shownCookieHint

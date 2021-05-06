@@ -33,7 +33,7 @@ export class FriendshipService {
         return friendships.map(friendship => friendship.friendedUser.nickName);
     }
 
-    async friendstatus(data, req: HttpRequest<User>): Promise<FriendMap> {
+    async friendstatus(data: { withAdmin?: boolean } = {}, req: HttpRequest<User>): Promise<FriendMap> {
         const map = await apiProxy.getUserMap(true);
 
         const friiendMap: FriendMap = {};
@@ -48,7 +48,10 @@ export class FriendshipService {
 
             for (let user of roomData.users) {
                 const friend = req.user.friends.find(friendShip => friendShip.friendedUser.pusherUuid === user.uuid);
-                if (friend) {
+                if (friend || (req.user.adminPrivileges && data.withAdmin && req.user.pusherUuid !== user.uuid)) {
+                    if (!friiendMap[user.name]) {
+                        friiendMap[user.name] = { index: -1, status: 'online' };
+                    }
                     friiendMap[user.name].position = user.position;
                     friiendMap[user.name].jitsiRoom = user.jitsiRoom;
                     friiendMap[user.name].joinedAt = user.joinedAt;
@@ -108,25 +111,19 @@ export class FriendshipService {
         const message = messageParts.join(' ');
         if (index === 'global') {
             if (req.user.adminPrivileges) {
-                for (let i in MessageCommunciation.websockets) {
-                    MessageCommunciation.websockets[i].send(JSON.stringify({
-                        type: 'receivemessage',
-                        author: req.user.nickName + ' - global',
-                        message: message
-                    }));
-
-                }
+                MessageCommunciation.sendToAllUsers({
+                    type: 'receivemessage',
+                    author: req.user.nickName + ' - global',
+                    message: message
+                });
             }
         } else {
             const friendId = req.user.friends[+index - 1].friendedUser.id;
-            if (MessageCommunciation.websockets[friendId]) {
-                MessageCommunciation.websockets[friendId].send(JSON.stringify({
-                    type: 'receivemessage',
-                    author: req.user.nickName,
-                    message: message
-                }));
-
-            }
+            MessageCommunciation.sendToUserById(friendId, {
+                type: 'receivemessage',
+                author: req.user.nickName,
+                message: message
+            });
         }
 
     }

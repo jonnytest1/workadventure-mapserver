@@ -1,5 +1,5 @@
 import base64url from 'base64url';
-import { GET, HttpRequest, HttpResponse, WS } from 'express-hibernate-wrapper/';
+import { GET, HttpRequest, HttpResponse, Websocket, WS } from 'express-hibernate-wrapper/';
 import { User } from './models/user';
 
 const messageHandlers: { [eventType: string]: (data: any, req: HttpRequest, ws?) => any } = {
@@ -20,7 +20,12 @@ export function MessageHandlerRegistration(constructor: new () => any) {
 @WS('message')
 export class MessageCommunciation {
 
-    static websockets: { [uuid: string]: any } = {};
+    static websockets: {
+        [uuid: string]: {
+            ws: Websocket,
+            pusherUuid: string
+        }
+    } = {};
 
     @GET('message/:data/message.html')
     async onmessage(req: HttpRequest, res: HttpResponse) {
@@ -32,26 +37,57 @@ export class MessageCommunciation {
             .send(`<script>const jsonV=${jsonStr};window.parent.postMessage({data:jsonV,type:"iframeresponse"},"*")</script>`);
     }
 
-    static onConnected(req: HttpRequest<User>, ws) {
+    static sendToUserById(userId: number, message: any): boolean {
+        if (!MessageCommunciation.websockets[userId]) {
+            return false;
+        }
+        MessageCommunciation.websockets[userId].ws.send(JSON.stringify(message));
+        return true;
+    }
+
+    static sendToUserByPusherUuid(pusherId: string, message: any): boolean {
+        let ws;
+        for (let i in MessageCommunciation.websockets) {
+            if (MessageCommunciation.websockets[i].pusherUuid === pusherId) {
+                ws = MessageCommunciation.websockets[i].ws;
+            }
+        }
+        if (!ws) {
+            return false;
+        }
+        ws.send(JSON.stringify(message));
+        return true;
+    }
+    static sendToAllUsers(message: any): number {
+        let ct = 0;
+        for (let i in MessageCommunciation.websockets) {
+            MessageCommunciation.websockets[i].ws.send(JSON.stringify(message));
+            ct++;
+        }
+        return ct;
+    }
+
+    static onConnected(req: HttpRequest<User>, ws: Websocket) {
         const userId = req.user.id;
-        this.websockets[userId] = ws;
-        ws.onclose = () => {
+        this.websockets[userId] = { ws: ws, pusherUuid: req.user.pusherUuid };
+
+        ws.on('close', () => {
             delete this.websockets[userId];
-        };
-        ws.onerror = e => {
+        });
+        ws.on('error', e => {
             console.error(e);
-        };
-        ws.onmessage = async message => {
+        });
+        ws.on('message', async message => {
             try {
-                console.log('received', message.data);
-                const data = JSON.parse(message.data);
+                console.log('received', message);
+                const data = JSON.parse(message);
                 if (data.type === '__proto__') {
                     return;
                 }
                 const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
 
                 if (responseJson !== undefined) {
-                    console.log('returning', responseJson, message.data);
+                    console.log('returning', responseJson, message);
                     ws.send(JSON.stringify({
                         data: responseJson,
                         type: 'websocketresponse',
@@ -61,6 +97,6 @@ export class MessageCommunciation {
             } catch (e) {
                 console.error(e);
             }
-        };
+        });
     }
 }
