@@ -3,7 +3,7 @@ import { MessageHandlerRegistration } from '../message-communication';
 import { User } from '../models/user';
 import { FriendshipService } from './friendship-service';
 
-const properties = ['nickName', 'pusherUuid', 'autoOpenGameOverlay', 'shownCookieHint'] as const;
+const properties = ['nickName', 'pusherUuid', 'autoOpenGameOverlay', 'shownCookieHint', 'trackedUser'] as const;
 
 type userProsp<T extends ReadonlyArray<keyof User>> = T;
 
@@ -49,7 +49,9 @@ export class UserService {
             friends: await new FriendshipService().friendstatus(undefined, req),
             isAdmin: req.user.adminPrivileges,
             autoOpenGameOverlay: req.user.autoOpenGameOverlay,
-            shownCookieHint: req.user.shownCookieHint
+            shownCookieHint: req.user.shownCookieHint,
+            trackedUser: req.user.trackedUser,
+            referenceUuid: req.user.referenceUuid
         };
     }
 }

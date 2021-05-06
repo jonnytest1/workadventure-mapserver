@@ -1,6 +1,6 @@
 import { column, mapping, Mappings, primary, table } from 'hibernatets';
+import { v4 as uuid } from 'uuid';
 import { FriendShip } from './friendship';
-
 @table()
 export class User {
 
@@ -36,8 +36,15 @@ export class User {
     @column({ type: 'boolean' })
     autoOpenGameOverlay: boolean;
 
+    @column()
+    trackedUser: string;
+
+    @column()
+    referenceUuid: string;
+
     constructor(cookie?) {
         this.cookie = cookie;
+        this.referenceUuid = uuid();
     }
 
 }

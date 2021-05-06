@@ -1,5 +1,7 @@
 import { GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
+import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { ApiUser, MapJson, Position, RoomMap, UserObj } from '../../public/users';
+import { MessageCommunciation } from './message-communication';
 const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
 export class ApiProxy {
 
@@ -11,7 +13,23 @@ export class ApiProxy {
         setInterval(async () => {
             const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
             ApiProxy.apiCache = await response.json();
+            MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
+                return {
+                    type: 'positionUpdate',
+                    data: await this.getAllUsersForPusherId(pusherUuid)
+                };
+            });
         }, 1000);
+    }
+
+    async getAllUsersForPusherId(pusherId: string) {
+        const roomMap = await this.getUserMap(true);
+        for (let i in roomMap) {
+            if (roomMap[i].users.find(user => user.pusherUuid === pusherId)) {
+                return roomMap[i].users;
+            }
+        }
+        return [];
     }
 
     @GET('/users')
@@ -27,6 +45,7 @@ export class ApiProxy {
 
     async getUsersFromDump(dump, containsIds): Promise<RoomMap> {
         const roomMap: RoomMap = {};
+        const userObjectMap: Map<string, ApiUser> = new Map();
         for (let room in dump) {
             if (!roomMap[room]) {
                 roomMap[room] = {
@@ -46,31 +65,49 @@ export class ApiProxy {
 
             for (let index in dump[room].users) {
                 const dumpUser = dump[room].users[index];
-                this.parseUser(dumpUser, roomMap[room].users, room, containsIds);
+                this.parseUser(dumpUser, roomMap[room].users, userObjectMap, room);
             }
+        }
+
+        const queryResult = await new DataBaseBase()
+            .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [[...userObjectMap.keys()]]);
+
+        for (const obj of queryResult) {
+            userObjectMap.get(obj.pusherUuid).userRefereneUuid = obj.referenceUuid;
+
+        }
+
+        if (!containsIds) {
+            userObjectMap.forEach(uO => {
+                delete uO.pusherUuid;
+            });
         }
         return roomMap;
     }
 
-    parseUser(user: UserObj, userList: Array<ApiUser>, room: string, containsIds: boolean) {
+    parseUser(user: UserObj, userList: Array<ApiUser>, glboalUserMap: Map<string, ApiUser>, room: string) {
         if (typeof user === 'string') {
             return;
         }
-        userList.push({
+
+        const userObj: ApiUser = {
             name: user.name,
             joinedAt: user.joinedAt,
             position: user.position,
             jitsiRoom: this.getJitsiKeyForPosition(room, user.position),
-            uuid: containsIds ? user.uuid : undefined
+            pusherUuid: user.uuid,
+            userRefereneUuid: null
+        };
+        userList.push(userObj);
+        glboalUserMap.set(user.uuid, userObj);
 
-        });
         if (user.positionNotifier && user.positionNotifier.zones) {
             for (let zoneTop of user.positionNotifier.zones) {
                 if (zoneTop) {
                     for (let zoneInner of zoneTop) {
                         if (zoneInner && zoneInner.things) {
                             for (const thing of zoneInner.things) {
-                                this.parseUser(thing, userList, room, containsIds);
+                                this.parseUser(thing, userList, glboalUserMap, room);
                             }
                         }
                     }

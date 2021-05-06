@@ -9,7 +9,8 @@ export type ApiUser = {
     position: Position;
     joinedAt: string;
     jitsiRoom: string
-    uuid?: string
+    pusherUuid?: string
+    userRefereneUuid: string
 };
 
 export interface RoomMap {

@@ -14,6 +14,7 @@ interface FriendMap {
         room?: string
         jitsiRoom?: string,
         joinedAt?: string,
+        referenceUuid: string
     };
 }
 
@@ -40,17 +41,18 @@ export class FriendshipService {
         req.user.friends.forEach((friend, index) => {
             friiendMap[friend.friendedUser.nickName] = {
                 status: 'offline',
-                index: index + 1
+                index: index + 1,
+                referenceUuid: friend.friendedUser.referenceUuid
             };
         });
         for (let room in map) {
             const roomData = map[room];
 
             for (let user of roomData.users) {
-                const friend = req.user.friends.find(friendShip => friendShip.friendedUser.pusherUuid === user.uuid);
-                if (friend || (req.user.adminPrivileges && data.withAdmin && req.user.pusherUuid !== user.uuid)) {
+                const friend = req.user.friends.find(friendShip => friendShip.friendedUser.pusherUuid === user.pusherUuid);
+                if (friend || (req.user.adminPrivileges && data.withAdmin && req.user.pusherUuid !== user.pusherUuid)) {
                     if (!friiendMap[user.name]) {
-                        friiendMap[user.name] = { index: -1, status: 'online' };
+                        friiendMap[user.name] = { index: -1, status: 'online', referenceUuid: null };
                     }
                     friiendMap[user.name].position = user.position;
                     friiendMap[user.name].jitsiRoom = user.jitsiRoom;

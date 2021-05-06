@@ -23,6 +23,7 @@ export class MessageCommunciation {
     static websockets: {
         [uuid: string]: {
             ws: Websocket,
+            user: User
             pusherUuid: string
         }
     } = {};
@@ -43,6 +44,17 @@ export class MessageCommunciation {
         }
         MessageCommunciation.websockets[userId].ws.send(JSON.stringify(message));
         return true;
+    }
+
+    static sendForAllUsersByPusherId(callback: (pusherId: string) => any) {
+        Object.keys(MessageCommunciation.websockets)
+
+            .forEach(async userId => {
+                const websocketObj = MessageCommunciation.websockets[userId];
+                const objectToSend = await callback(websocketObj.pusherUuid);
+                websocketObj.ws.send(JSON.stringify(objectToSend));
+            });
+
     }
 
     static sendToUserByPusherUuid(pusherId: string, message: any): boolean {
@@ -69,7 +81,7 @@ export class MessageCommunciation {
 
     static onConnected(req: HttpRequest<User>, ws: Websocket) {
         const userId = req.user.id;
-        this.websockets[userId] = { ws: ws, pusherUuid: req.user.pusherUuid };
+        this.websockets[userId] = { ws: ws, pusherUuid: req.user.pusherUuid, user: req.user };
 
         ws.on('close', () => {
             delete this.websockets[userId];
@@ -84,6 +96,7 @@ export class MessageCommunciation {
                 if (data.type === '__proto__') {
                     return;
                 }
+                req.user = this.websockets[userId].user;
                 const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
 
                 if (responseJson !== undefined) {
