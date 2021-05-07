@@ -7,6 +7,13 @@ export class ApiProxy {
 
     static roomJsons: { [room: string]: MapJson } = {};
 
+    private static pusherIdCache: {
+        [pusherId: string]: {
+            timestamp: number,
+            userRef: string
+        }
+    } = {};
+
     static apiCache = null;
 
     constructor() {
@@ -43,7 +50,7 @@ export class ApiProxy {
         return this.getUsersFromDump(ApiProxy.apiCache, containsIds);
     }
 
-    async getUsersFromDump(dump, containsIds): Promise<RoomMap> {
+    private async getUsersFromDump(dump, containsIds): Promise<RoomMap> {
         const roomMap: RoomMap = {};
         const userObjectMap: Map<string, ApiUser> = new Map();
         for (let room in dump) {
@@ -69,14 +76,36 @@ export class ApiProxy {
             }
         }
 
-        const queryResult = await new DataBaseBase()
-            .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [[...userObjectMap.keys()]]);
+        const pusherKeys = [...userObjectMap.keys()];
+        const pusherUuids = pusherKeys.filter(uuid => {
+            if (!ApiProxy.pusherIdCache[uuid]) {
+                return true;
+            }
+            if (ApiProxy.pusherIdCache[uuid].timestamp < Date.now() - (1000 * 60 * 5)) {
+                return true;
+            }
+            return false;
+        });
+        if (pusherUuids.length) {
+            const queryResult = await new DataBaseBase()
+                .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
 
-        for (const obj of queryResult) {
-            userObjectMap.get(obj.pusherUuid).userRefereneUuid = obj.referenceUuid;
-
+            for (const obj of queryResult) {
+                ApiProxy.pusherIdCache[obj.pusherUuid] = {
+                    timestamp: Date.now(),
+                    userRef: obj.referenceUuid
+                };
+            }
         }
-
+        pusherKeys.forEach(pusherKey => {
+            if (!ApiProxy.pusherIdCache[pusherKey]) {
+                ApiProxy.pusherIdCache[pusherKey] = {
+                    timestamp: Date.now() - (1000 * 60 * 2),
+                    userRef: null
+                };
+            }
+            userObjectMap.get(pusherKey).userRefereneUuid = ApiProxy.pusherIdCache[pusherKey].userRef;
+        });
         if (!containsIds) {
             userObjectMap.forEach(uO => {
                 delete uO.pusherUuid;
@@ -85,7 +114,7 @@ export class ApiProxy {
         return roomMap;
     }
 
-    parseUser(user: UserObj, userList: Array<ApiUser>, glboalUserMap: Map<string, ApiUser>, room: string) {
+    private parseUser(user: UserObj, userList: Array<ApiUser>, glboalUserMap: Map<string, ApiUser>, room: string) {
         if (typeof user === 'string') {
             return;
         }
