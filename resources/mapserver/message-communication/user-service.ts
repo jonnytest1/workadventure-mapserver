@@ -26,6 +26,7 @@ export class UserService {
 
     incrementDeath(data: unknown, req: HttpRequest<User>) {
         req.user.deathCount++;
+        return true;
     }
 
     userUpdate(data: UserUpdateEvent & Object, req: HttpRequest<User>) {
@@ -36,10 +37,12 @@ export class UserService {
                 req.user[prop] = data[prop];
             }
         }
+        return true;
     }
 
     enableGameMode(data: unknown, req: HttpRequest<User>) {
         req.user.gameModeEnabled = true;
+        return true;
     }
 
     async getUserData(data: unknown, req: HttpRequest<User>) {

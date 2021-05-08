@@ -52,7 +52,10 @@ export class MessageCommunciation {
             .forEach(async userId => {
                 const websocketObj = MessageCommunciation.websockets[userId];
                 const objectToSend = await callback(websocketObj.pusherUuid);
-                websocketObj.ws.send(JSON.stringify(objectToSend));
+                if (objectToSend != null) {
+                    websocketObj.ws.send(JSON.stringify(objectToSend));
+                }
+
             });
 
     }

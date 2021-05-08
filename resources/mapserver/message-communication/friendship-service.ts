@@ -104,6 +104,7 @@ export class FriendshipService {
     }
     unreadyfriendship(data: unknown, req: HttpRequest<User>) {
         req.user.readyForFriends = null;
+        return true;
     }
 
     async chatmessage(data: { message: string }, req: HttpRequest<User>, ws) {
@@ -127,6 +128,7 @@ export class FriendshipService {
                 message: message
             });
         }
+        return true;
 
     }
 }
