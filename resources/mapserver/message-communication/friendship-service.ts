@@ -50,7 +50,7 @@ export class FriendshipService {
 
             for (let user of roomData.users) {
                 const friend = req.user.friends.find(friendShip => friendShip.friendedUser.pusherUuid === user.pusherUuid);
-                if (friend || (req.user.adminPrivileges && data.withAdmin && req.user.pusherUuid !== user.pusherUuid)) {
+                if (friend || (req.user.adminPrivileges && data.withAdmin)) {
                     if (!friiendMap[user.name]) {
                         friiendMap[user.name] = { index: -1, status: 'online', referenceUuid: null };
                     }
