@@ -7,5 +7,5 @@ export class UserAttribute extends ExtendedMapItem<keyof UserAttributeMap> {
 }
 
 export type UserAttributeMap = {
-    t: ''
+    items: string
 };

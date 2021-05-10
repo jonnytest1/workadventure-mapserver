@@ -1,6 +1,7 @@
 import { HttpRequest } from 'express-hibernate-wrapper';
 import { MessageHandlerRegistration } from '../message-communication';
-import { InventoryItem, InventoryItemType } from '../models/inventory-item';
+import { InventoryItem } from '../models/inventory-item';
+import { InventoryItemType } from '../models/inventory-item-type';
 import { User } from '../models/user';
 import { FriendshipService } from './friendship-service';
 
@@ -59,7 +60,13 @@ export class UserService {
             autoOpenGameOverlay: req.user.autoOpenGameOverlay,
             shownCookieHint: req.user.shownCookieHint,
             trackedUser: req.user.trackedUser,
-            referenceUuid: req.user.referenceUuid
+            referenceUuid: req.user.referenceUuid,
+            inventory: req.user.inventory.map(item => {
+                return {
+                    itemType: item.itemType,
+                    image: item.image
+                }
+            })
         };
     }
 }

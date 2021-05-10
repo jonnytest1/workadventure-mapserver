@@ -1,20 +1,21 @@
 import { column, primary, table } from 'hibernatets';
+import { InventoryItemType } from './inventory-item-type';
 
-export const enum InventoryItemType { Random };
 @table()
 export class InventoryItem {
 
-
-
     @primary()
-    id
+    id;
 
     @column()
-    itemType: InventoryItemType
+    itemType: InventoryItemType;
+
+    @column()
+    image: string;
 
     constructor(type?: InventoryItemType) {
         if (type !== undefined) {
-            this.itemType = type
+            this.itemType = type;
         }
     }
 }
