@@ -1,5 +1,6 @@
 import { HttpRequest } from 'express-hibernate-wrapper';
 import { MessageHandlerRegistration } from '../message-communication';
+import { InventoryItem, InventoryItemType } from '../models/inventory-item';
 import { User } from '../models/user';
 import { FriendshipService } from './friendship-service';
 
@@ -43,6 +44,10 @@ export class UserService {
     enableGameMode(data: unknown, req: HttpRequest<User>) {
         req.user.gameModeEnabled = true;
         return true;
+    }
+
+    addItem(data, req: HttpRequest<User>) {
+        req.user.inventory.push(new InventoryItem(InventoryItemType.Random))
     }
 
     async getUserData(data: unknown, req: HttpRequest<User>) {

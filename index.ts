@@ -25,7 +25,9 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                                     friendedUser: {
                                         depths: 6,
                                         filter: 'TRUE=TRUE'
-                                    }
+                                    },
+                                    attributes: "TRUE=TRUE",
+                                    inventory: "TRUE=TRUE"
                                 }
                             });
                         } catch (e) {

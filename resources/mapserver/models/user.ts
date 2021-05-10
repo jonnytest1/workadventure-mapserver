@@ -2,6 +2,7 @@ import { column, mapping, Mappings, primary, table } from 'hibernatets';
 import { ExtendedMap } from 'hibernatets/extended-map/extended-map';
 import { v4 as uuid } from 'uuid';
 import { FriendShip } from './friendship';
+import { InventoryItem } from './inventory-item';
 import { UserAttribute, UserAttributeMap } from './user-attribute';
 @table()
 export class User {
@@ -49,6 +50,8 @@ export class User {
     })
     attributes = new ExtendedMap<UserAttribute, UserAttributeMap>(UserAttribute);
 
+    @mapping(Mappings.OneToMany, InventoryItem, 'userRef')
+    inventory: Array<InventoryItem> = [];
     constructor(cookie?) {
         this.cookie = cookie;
         this.referenceUuid = uuid();
