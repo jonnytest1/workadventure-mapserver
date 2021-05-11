@@ -52,7 +52,7 @@ export class MessageCommunciation {
             .forEach(async userId => {
                 const websocketObj = MessageCommunciation.websockets[userId];
                 const objectToSend = await callback(websocketObj.pusherUuid);
-                if (objectToSend != null) {
+                if (objectToSend !== null) {
                     websocketObj.ws.send(JSON.stringify(objectToSend));
                 }
 
@@ -100,16 +100,23 @@ export class MessageCommunciation {
                     return;
                 }
                 req.user = this.websockets[userId].user;
-                const responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
 
-                if (responseJson !== undefined) {
-                    console.log('returning', responseJson, message);
-                    ws.send(JSON.stringify({
-                        data: responseJson,
-                        type: 'websocketresponse',
-                        uuid: data.uuid || undefined
-                    }));
+                let responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
+                if (responseJson === 'no-response') {
+                    console.log('no-response', message);
+                    return;
                 }
+
+                if (responseJson === undefined) {
+                    responseJson = true;
+                }
+
+                console.log('returning', responseJson, message);
+                ws.send(JSON.stringify({
+                    data: responseJson,
+                    type: 'websocketresponse',
+                    uuid: data.uuid || undefined
+                }));
             } catch (e) {
                 console.error(e);
             }

@@ -8,4 +8,14 @@ export class UserAttribute extends ExtendedMapItem<keyof UserAttributeMap> {
 
 export type UserAttributeMap = {
     items: string
+    mapSize: number
+    previousMap: string
 };
+
+
+type MapType<O, T extends Partial<{ [Key in keyof O]: any }>> = { [key in keyof O]: key extends keyof T ? T[key] : unknown }
+
+
+export type UserAttributeParsed = MapType<UserAttributeMap, {
+    mapSize: number
+}>

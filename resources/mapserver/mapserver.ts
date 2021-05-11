@@ -12,6 +12,7 @@ import { AddressResolver } from './service/address-from-geo';
 import { ImageResolver } from './service/image-resolver';
 import { MapAttributes } from './service/map-attributes-holder';
 import { SitesAdder } from './service/site-adder';
+import { UserMapLoader } from './service/user-map-loader';
 import { MapResolver } from './service/woirld-map-resolver';
 @Path('mapserver')
 export class Mapserver {
@@ -80,7 +81,7 @@ export class Mapserver {
         res.set('Content-Type', 'image/png')
             .send(Buffer.from(await tile.data));
     }
-
+    @GET({ path: 'usermap/assets/:image' })
     @GET({ path: 'assets/:image' })
     @GET({ path: '/world/assets/:image' })
     @GET({ path: ':zoom/lat/:tileX/lon/:tileY/assets/:image' })
@@ -129,5 +130,20 @@ export class Mapserver {
         const worldMapJsonString = await mapReolver.getWorldMapJson();
         res.set('Content-Type', 'application/json')
             .send(worldMapJsonString);
+    }
+
+    @GET({ path: 'usermap/:referenceUuid.json' })
+    async getUserMap(req: HttpRequest<User>, res: HttpResponse) {
+        console.log(req.params.referenceUuid);
+
+        const user = await load(User, u => u.referenceUuid = req.params.referenceUuid, undefined, {
+            first: true,
+            deep: {
+                attributes: 'TRUE=TRUE'
+            }
+        });
+        const mapJson = await new UserMapLoader().getMapJsonForUser(user);
+        res.set('Content-Type', 'application/json')
+            .send(mapJson);
     }
 }
