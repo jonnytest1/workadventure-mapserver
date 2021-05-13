@@ -22,6 +22,4 @@ export class MapAttributes {
         return this.getMaxAmountOfImagesForZoom(zoom) * MapAttributes.indexesPerTile;
     }
 
-
-    static
 }

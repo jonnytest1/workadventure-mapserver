@@ -52,6 +52,7 @@ export class User {
 
     @mapping(Mappings.OneToMany, InventoryItem, 'userRef')
     inventory: Array<InventoryItem> = [];
+
     constructor(cookie?) {
         this.cookie = cookie;
         this.referenceUuid = uuid();

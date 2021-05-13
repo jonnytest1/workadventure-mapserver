@@ -139,7 +139,8 @@ export class Mapserver {
         const user = await load(User, u => u.referenceUuid = req.params.referenceUuid, undefined, {
             first: true,
             deep: {
-                attributes: 'TRUE=TRUE'
+                attributes: 'TRUE=TRUE',
+                privateMapOverrides: 'TRUE=TRUE'
             }
         });
         const mapJson = await new UserMapLoader().getMapJsonForUser(user);

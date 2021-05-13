@@ -10,12 +10,11 @@ export type UserAttributeMap = {
     items: string
     mapSize: number
     previousMap: string
+    maxTileSetIndex: number
 };
 
-
-type MapType<O, T extends Partial<{ [Key in keyof O]: any }>> = { [key in keyof O]: key extends keyof T ? T[key] : unknown }
-
+type MapType<O, T extends Partial<{ [Key in keyof O]: any }>> = { [key in keyof O]: key extends keyof T ? T[key] : unknown };
 
 export type UserAttributeParsed = MapType<UserAttributeMap, {
     mapSize: number
-}>
+}>;

@@ -1,7 +1,7 @@
 import { HttpRequest } from 'express-hibernate-wrapper';
 import { MessageHandlerRegistration } from '../message-communication';
 import { InventoryItem } from '../models/inventory-item';
-import { InventoryItemType } from '../models/inventory-item-type';
+import { InventoryItemType, inventoryTypeMap } from '../models/inventory-item-type';
 import { User } from '../models/user';
 import { UserAttributeMap } from '../models/user-attribute';
 import { FriendshipService } from './friendship-service';
@@ -66,6 +66,15 @@ export class UserService {
         req.user.inventory.push(new InventoryItem(InventoryItemType.Random));
     }
 
+    async activateItem(data: { item: number }, req: HttpRequest<User>) {
+        for (let item of req.user.inventory) {
+            if (item.id === data.item) {
+                inventoryTypeMap[item.itemType].activate(item, req.user);
+                return item.publicItem();
+            }
+        }
+    }
+
     async getUserData(data: unknown, req: HttpRequest<User>) {
         const attributesCopy: FilteredUserAttributes = {};
         req.user.attributes.forEachValue((value, key) => {
@@ -83,12 +92,7 @@ export class UserService {
             trackedUser: req.user.trackedUser,
             referenceUuid: req.user.referenceUuid,
             attributes: attributesCopy,
-            inventory: req.user.inventory.map(item => {
-                return {
-                    itemType: item.itemType,
-                    image: item.image
-                };
-            })
+            inventory: req.user.inventory.map(item => item.publicItem())
         };
     }
 }

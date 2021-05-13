@@ -1,5 +1,7 @@
 import { promises } from 'fs';
+import { load, save } from 'hibernatets';
 import { User } from '../models/user';
+import { UserMapAttributes } from '../models/user-map-attributes';
 import { MapJson } from './map';
 import { MapAttributes } from './map-attributes-holder';
 export class UserMapLoader extends MapAttributes {
@@ -13,7 +15,17 @@ export class UserMapLoader extends MapAttributes {
     }
 
     async getMapJsonForUser(user: User) {
-        const buffer = await promises.readFile(`${__dirname}/resources/default-map.json`, { encoding: 'utf8' });
+        let [mapAttributes, buffer] = await Promise.all([
+            load(UserMapAttributes, a => a.userRef = user.referenceUuid, undefined, { first: true, deep: true }),
+            promises.readFile(`${__dirname}/resources/default-map.json`, { encoding: 'utf8' })
+        ]);
+
+        if (!mapAttributes) {
+            mapAttributes = new UserMapAttributes();
+            mapAttributes.userRef = user.referenceUuid;
+            save(mapAttributes);
+        }
+
         const mapJson: MapJson = JSON.parse(buffer);
 
         const mapTilesPerRow = user.attributes.getValue('mapSize', 20);
@@ -70,9 +82,16 @@ export class UserMapLoader extends MapAttributes {
             y: 0,
             type: 'objectgroup'
         });
+        const background = Array(completeIndexArraySize)
+            .fill(UserMapLoader.defaultbackgroundTileIndex);
+
+        mapAttributes.privateMapOverrides.forEach(override => {
+            const index = override.y * indexesInCompleteRow + override.x;
+            background[index] = override.index;
+        });
+
         mapJson.layers.push({
-            data: Array(completeIndexArraySize)
-                .fill(UserMapLoader.defaultbackgroundTileIndex),
+            data: background,
             name: 'background-image',
             id: 20000,
             'opacity': 1,
