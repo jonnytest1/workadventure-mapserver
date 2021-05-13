@@ -2,8 +2,9 @@ import { column, mapping, Mappings, primary, table } from 'hibernatets';
 import { ExtendedMap } from 'hibernatets/extended-map/extended-map';
 import { v4 as uuid } from 'uuid';
 import { FriendShip } from './friendship';
-import { InventoryItem } from './inventory-item';
+import { InventoryItem } from './inventory/inventory-item';
 import { UserAttribute, UserAttributeMap } from './user-attribute';
+
 @table()
 export class User {
 

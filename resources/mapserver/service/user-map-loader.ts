@@ -1,7 +1,6 @@
 import { promises } from 'fs';
-import { load, save } from 'hibernatets';
-import { User } from '../models/user';
-import { UserMapAttributes } from '../models/user-map-attributes';
+import { User } from '../user/user';
+import { userAttributesForUserRefUuid } from '../user/user-map-attributes-loader';
 import { MapJson } from './map';
 import { MapAttributes } from './map-attributes-holder';
 export class UserMapLoader extends MapAttributes {
@@ -16,15 +15,9 @@ export class UserMapLoader extends MapAttributes {
 
     async getMapJsonForUser(user: User) {
         let [mapAttributes, buffer] = await Promise.all([
-            load(UserMapAttributes, a => a.userRef = user.referenceUuid, undefined, { first: true, deep: true }),
+            userAttributesForUserRefUuid(user.referenceUuid),
             promises.readFile(`${__dirname}/resources/default-map.json`, { encoding: 'utf8' })
         ]);
-
-        if (!mapAttributes) {
-            mapAttributes = new UserMapAttributes();
-            mapAttributes.userRef = user.referenceUuid;
-            save(mapAttributes);
-        }
 
         const mapJson: MapJson = JSON.parse(buffer);
 

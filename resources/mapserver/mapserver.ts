@@ -7,7 +7,7 @@ import { join } from 'path';
 import { GeoLocation } from './models/location';
 import { Site } from './models/site';
 import { Tile } from './models/tile';
-import { User } from './models/user';
+import { User } from './user/user';
 import { AddressResolver } from './service/address-from-geo';
 import { ImageResolver } from './service/image-resolver';
 import { MapAttributes } from './service/map-attributes-holder';

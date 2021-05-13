@@ -1,6 +1,6 @@
 import base64url from 'base64url';
 import { GET, HttpRequest, HttpResponse, Websocket, WS } from 'express-hibernate-wrapper/';
-import { User } from './models/user';
+import { User } from './user/user';
 
 const messageHandlers: { [eventType: string]: (data: any, req: HttpRequest, ws?) => any } = {
     cookie: () => true

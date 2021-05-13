@@ -23,7 +23,7 @@ export class InventoryItem {
     }
 
     publicItem() {
-        const attributes: { index?: number } = JSON.parse(this.inventoryAttributes)
+        const attributes: { index?: number } = JSON.parse(this.inventoryAttributes);
         return {
             itemType: this.itemType,
             image: this.image,

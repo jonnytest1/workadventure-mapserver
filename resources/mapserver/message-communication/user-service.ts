@@ -1,9 +1,12 @@
 import { HttpRequest } from 'express-hibernate-wrapper';
+//import { load, save } from 'hibernatets';
 import { MessageHandlerRegistration } from '../message-communication';
-import { InventoryItem } from '../models/inventory-item';
-import { InventoryItemType, inventoryTypeMap } from '../models/inventory-item-type';
-import { User } from '../models/user';
-import { UserAttributeMap } from '../models/user-attribute';
+import { InventoryItem } from '../user/inventory/inventory-item';
+import { inventoryActivationMap, ItemActivationData } from '../user/inventory/inventory-item-activation';
+import { InventoryItemType } from '../user/inventory/inventory-item-type';
+import { RemoveItem } from '../user/inventory/remove-item-error';
+import { User } from '../user/user';
+import { UserAttributeMap } from '../user/user-attribute';
 import { FriendshipService } from './friendship-service';
 
 const properties = ['nickName', 'pusherUuid', 'autoOpenGameOverlay', 'shownCookieHint', 'trackedUser'] as const;
@@ -18,6 +21,7 @@ export type UserUpdateEvent = Partial<{
 export type FilteredUserAttributes = Partial<{
     [K in TypeSafeUserAttributes[number]]: UserAttributeMap[K]
 }>;
+
 /*extends { [key: keyof User] : any } {
     nickName?: string;
     uuid?: string;
@@ -62,15 +66,29 @@ export class UserService {
         return true;
     }
 
-    addItem(data, req: HttpRequest<User>) {
-        req.user.inventory.push(new InventoryItem(InventoryItemType.Random));
+    addItem(data: { count?: number } = {}, req: HttpRequest<User>) {
+        if (!data.count || data.count > 10) {
+            data.count = 1;
+        }
+        for (let i = 0; i < data.count; i++) {
+            req.user.inventory.push(new InventoryItem(InventoryItemType.Random));
+        }
     }
 
-    async activateItem(data: { item: number }, req: HttpRequest<User>) {
+    async activateItem(data: ItemActivationData, req: HttpRequest<User>): Promise<Array<ReturnType<InventoryItem['publicItem']>>> {
         for (let item of req.user.inventory) {
             if (item.id === data.item) {
-                inventoryTypeMap[item.itemType].activate(item, req.user);
-                return item.publicItem();
+                try {
+                    await inventoryActivationMap[item.itemType].activate(item, req.user, data);
+                } catch (e) {
+                    if (e instanceof RemoveItem) {
+                        req.user.inventory.filter(invItem => invItem.id !== item.id);
+                        return [];
+                    } else {
+                        throw e;
+                    }
+                }
+                return [item.publicItem()];
             }
         }
     }
@@ -95,4 +113,5 @@ export class UserService {
             inventory: req.user.inventory.map(item => item.publicItem())
         };
     }
+
 }

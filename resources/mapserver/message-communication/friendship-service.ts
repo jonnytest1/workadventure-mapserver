@@ -3,8 +3,8 @@ import { load } from 'hibernatets';
 import { Position } from '../../../public/users';
 import { ApiProxy } from '../api.proxy';
 import { MessageCommunciation, MessageHandlerRegistration } from '../message-communication';
-import { FriendShip } from '../models/friendship';
-import { User } from '../models/user';
+import { FriendShip } from '../user/friendship';
+import { User } from '../user/user';
 
 interface FriendMap {
     [nickname: string]: {
