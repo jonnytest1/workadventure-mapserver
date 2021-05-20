@@ -23,5 +23,4 @@ export class Tile {
         }
     })
     data: ArrayBuffer;
-
 }

@@ -3,10 +3,10 @@
 
 setTimeout(async () => {
     //@ts-ignore
-    const [{ getUserData }, { message }] = await Promise.all([require('./game/user-data.js'), require('./backend-connection')]);
+    const [{ getUserData }, { message, backendDomain }] = await Promise.all([require('./game/user-data.js'), require('./backend-connection')]);
 
     WA.registerMenuCommand('Register your own map -basintern', () => {
-        WA.openTab('https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/register.html');
+        WA.openTab(`${backendDomain}/mapserver/register.html`);
     });
     const userData = await getUserData();
     if(!userData.shownCookieHint) {
