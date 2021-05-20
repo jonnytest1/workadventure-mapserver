@@ -7,13 +7,13 @@ import { join } from 'path';
 import { GeoLocation } from './models/location';
 import { Site } from './models/site';
 import { Tile } from './models/tile';
-import { User } from './user/user';
 import { AddressResolver } from './service/address-from-geo';
 import { ImageResolver } from './service/image-resolver';
 import { MapAttributes } from './service/map-attributes-holder';
 import { SitesAdder } from './service/site-adder';
 import { UserMapLoader } from './service/user-map-loader';
 import { MapResolver } from './service/woirld-map-resolver';
+import { User } from './user/user';
 @Path('mapserver')
 export class Mapserver {
 
@@ -73,6 +73,7 @@ export class Mapserver {
     @GET({ path: ':_/lat/:_/lon/:_/image/:zoom/:x/:y.png' })
     async countryimage(req: HttpRequest, res: HttpResponse) {
 
+
         const tempTile = new Tile();
         tempTile.x = req.params.y; //stored wrong :(
         tempTile.y = req.params.x;
@@ -80,6 +81,7 @@ export class Mapserver {
         const tile = await ImageResolver.loadTileData(tempTile);
         res.set('Content-Type', 'image/png')
             .send(Buffer.from(await tile.data));
+
     }
     @GET({ path: 'usermap/assets/:image' })
     @GET({ path: 'assets/:image' })

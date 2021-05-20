@@ -5,6 +5,8 @@ import { load, save, updateDatabase } from 'hibernatets';
 import { v4 as uuid } from 'uuid';
 import { MessageCommunciation } from './resources/mapserver/message-communication';
 import { User } from './resources/mapserver/user/user';
+const express = require('express');
+
 config({
     path: __dirname + '/.env'
 });
@@ -16,6 +18,10 @@ updateDatabase(__dirname + '/resources/mapserver/models')
             prereesources: app => {
                 app.use(cookieParser());
                 app.use(async (req: HttpRequest<User>, res, next) => {
+                    if (req.path == "/rest/users") {
+                        next()
+                        return;
+                    }
                     if (!req.user && req.cookies.user) {
                         try {
                             req.user = await load(User, u => u.cookie = req.cookies.user, undefined, {
@@ -23,7 +29,7 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                                 deep: {
                                     friends: 'TRUE=TRUE',
                                     friendedUser: {
-                                        depths: 6,
+                                        depths: 4,
                                         filter: 'TRUE=TRUE'
                                     },
                                     attributes: 'TRUE=TRUE',
@@ -37,6 +43,7 @@ updateDatabase(__dirname + '/resources/mapserver/models')
 
                     if (!req.user) {
                         if (req.method !== 'GET' || req.path.endsWith('.js') || req.path.endsWith('/message.html')) {
+                            console.log(`createing new user at ${req.path} with ${req.method}`)
                             req.user = new User(uuid());
                             await save(req.user);
                             res.cookie('user', req.user.cookie, {

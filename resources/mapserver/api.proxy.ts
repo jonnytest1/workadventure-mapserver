@@ -18,19 +18,21 @@ export class ApiProxy {
 
     constructor() {
         setInterval(async () => {
-            const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
-            ApiProxy.apiCache = await response.json();
-            MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
-                const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
-                if (apiUsers.length == 1) {
-                    return null;
-                }
+            if (MessageCommunciation.hasUsers()) {
+                const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+                ApiProxy.apiCache = await response.json();
+                MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
+                    const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
+                    if (apiUsers.length == 1) {
+                        return null;
+                    }
 
-                return {
-                    type: 'positionUpdate',
-                    data: apiUsers
-                };
-            });
+                    return {
+                        type: 'positionUpdate',
+                        data: apiUsers
+                    };
+                });
+            }
         }, 1000);
     }
 
@@ -51,7 +53,6 @@ export class ApiProxy {
     }
 
     async getUserMap(containsIds = false) {
-
         return this.getUsersFromDump(ApiProxy.apiCache, containsIds);
     }
 
@@ -86,7 +87,7 @@ export class ApiProxy {
             if (!ApiProxy.pusherIdCache[uuid]) {
                 return true;
             }
-            if (ApiProxy.pusherIdCache[uuid].timestamp < Date.now() - (1000 * 60 * 5)) {
+            if (ApiProxy.pusherIdCache[uuid].timestamp < (Date.now() - (1000 * 60 * 5))) {
                 return true;
             }
             return false;
@@ -163,6 +164,7 @@ export class ApiProxy {
 
         if (!(ApiProxy.roomJsons[room].layers instanceof Array)) {
             console.log('layers is no array');
+            return null
         }
         for (const layer of ApiProxy.roomJsons[room].layers) {
             if (!layer.properties) {

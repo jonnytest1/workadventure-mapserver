@@ -1,5 +1,7 @@
 import { ResponseCodeError } from 'express-hibernate-wrapper';
+import { existsSync, promises } from 'fs';
 import { load, save } from 'hibernatets';
+import { dirname, join } from 'path';
 import { GeoLocation } from '../models/location';
 import { Tile } from '../models/tile';
 import { MapResolver } from './woirld-map-resolver';
@@ -15,33 +17,48 @@ export class ImageResolver {
     }
 
     static async loadTileData(tempTile: Tile): Promise<Tile> {
-        let loadedTile = await load(Tile, t => {
-            t.zoom = tempTile.zoom;
-            t.x = tempTile.x;
-            t.y = tempTile.y;
-            return;
-        }, undefined, { first: true });
+        const paths = [__dirname, '../../../public/tiles', tempTile.zoom, `${tempTile.x}-${tempTile.y}.png`]
+        const resource = join(...paths);
+        try {
+            const buffer = await promises.readFile(resource);
+            tempTile.data = buffer
+            return tempTile
+        } catch (e) {
 
-        if (loadedTile) {
-            return loadedTile;
-        }
 
-        const origin = origins[Math.floor(Math.random() * origins.length)];
-        const url = new URL(`https://${origin}.tile.openstreetmap.org`);
-        url.pathname = `${tempTile.zoom}/${tempTile.x}/${tempTile.y}.png`;
-        console.log(url.href);
-        const response = await fetch(url.href, {
-            headers: {
-                'User-Agent': 'NodeFetch/2.6.1'
+
+            let loadedTile = await load(Tile, t => {
+                t.zoom = tempTile.zoom;
+                t.x = tempTile.x;
+                t.y = tempTile.y;
+                return;
+            }, undefined, { first: true });
+
+            if (loadedTile) {
+                if (!existsSync(dirname(resource))) {
+                    await promises.mkdir(dirname(resource))
+                }
+                promises.writeFile(resource, Buffer.from(loadedTile.data));
+                return loadedTile;
             }
-        });
-        console.log(response.status);
-        if (response.status !== 200) {
-            throw new ResponseCodeError(response.status, await response.text());
+
+            const origin = origins[Math.floor(Math.random() * origins.length)];
+            const url = new URL(`https://${origin}.tile.openstreetmap.org`);
+            url.pathname = `${tempTile.zoom}/${tempTile.x}/${tempTile.y}.png`;
+            console.log(url.href);
+            const response = await fetch(url.href, {
+                headers: {
+                    'User-Agent': 'NodeFetch/2.6.1'
+                }
+            });
+            console.log(response.status);
+            if (response.status !== 200) {
+                throw new ResponseCodeError(response.status, await response.text());
+            }
+            tempTile.data = await response.arrayBuffer();
+            save(tempTile);
+            return tempTile;
         }
-        tempTile.data = await response.arrayBuffer();
-        save(tempTile);
-        return tempTile;
     }
 
 }

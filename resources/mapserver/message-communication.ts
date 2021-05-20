@@ -20,6 +20,7 @@ export function MessageHandlerRegistration(constructor: new () => any) {
 @WS('message')
 export class MessageCommunciation {
 
+
     static websockets: {
         [uuid: string]: {
             ws: Websocket,
@@ -38,6 +39,10 @@ export class MessageCommunciation {
             .send(`<script>const jsonV=${jsonStr};window.parent.postMessage({data:jsonV,type:"iframeresponse"},"*")</script>`);
     }
 
+    static hasUsers() {
+        return !!Object.keys(this.websockets).length
+    }
+
     static sendToUserById(userId: number, message: any): boolean {
         if (!MessageCommunciation.websockets[userId]) {
             return false;
@@ -48,11 +53,10 @@ export class MessageCommunciation {
 
     static sendForAllUsersByPusherId(callback: (pusherId: string) => any) {
         Object.keys(MessageCommunciation.websockets)
-
             .forEach(async userId => {
                 const websocketObj = MessageCommunciation.websockets[userId];
                 const objectToSend = await callback(websocketObj.pusherUuid);
-                if (objectToSend !== null) {
+                if (objectToSend !== null && websocketObj.ws.readyState !== websocketObj.ws.CLOSED) {
                     websocketObj.ws.send(JSON.stringify(objectToSend));
                 }
 
@@ -65,6 +69,7 @@ export class MessageCommunciation {
         for (let i in MessageCommunciation.websockets) {
             if (MessageCommunciation.websockets[i].pusherUuid === pusherId) {
                 ws = MessageCommunciation.websockets[i].ws;
+                break
             }
         }
         if (!ws) {
@@ -94,6 +99,10 @@ export class MessageCommunciation {
         });
         ws.on('message', async message => {
             try {
+                if (message == "connectioncheck") {
+                    ws.send("connection");
+                    return
+                }
                 console.log('received', message);
                 const data = JSON.parse(message);
                 if (data.type === '__proto__') {
@@ -111,7 +120,7 @@ export class MessageCommunciation {
                     responseJson = true;
                 }
 
-                console.log('returning', responseJson, message);
+                //  console.log('returning', responseJson, message);
                 ws.send(JSON.stringify({
                     data: responseJson,
                     type: 'websocketresponse',
