@@ -202,22 +202,22 @@ export class MapResolver extends MapAttributes {
     private addZoomUpIcon() {
 
         const previousZoom = this.zoom - MapResolver.zoomIncrement;
-        if (previousZoom < MapResolver.worldZoom) {
-            return;
-        }
+        let url = '/_/global/jonnytest1.github.io/workadventuremap/space/space.json';
+
         const zoomUpLayerArray = Array(this.completeIndexArraySize)
             .fill(0);
         zoomUpLayerArray[zoomUpLayerArray.length - 1] = 4;
-        const amountOfIndicesInPreviousZoom = MapResolver.getAmountOfIndicesForZoom(previousZoom);
-        const amountOFIndicesInCurrentZoom = MapResolver.getAmountOfIndicesForZoom(this.zoom);
+        if (previousZoom >= MapResolver.worldZoom) {
+            const amountOfIndicesInPreviousZoom = MapResolver.getAmountOfIndicesForZoom(previousZoom);
+            const amountOFIndicesInCurrentZoom = MapResolver.getAmountOfIndicesForZoom(this.zoom);
 
-        const upperLayer = this.layerStart
-            .dividedBy(amountOFIndicesInCurrentZoom)
-            .multipliedBy(amountOfIndicesInPreviousZoom)
-            .rounded()
-            .subtract(Math.floor(MapAttributes.indexesPerTile / 2));
-
-        const url = `${SitesAdder.sitePrefix}${previousZoom}/lat/${upperLayer.lat}/lon/${upperLayer.lon}/site.json`;
+            const upperLayer = this.layerStart
+                .dividedBy(amountOFIndicesInCurrentZoom)
+                .multipliedBy(amountOfIndicesInPreviousZoom)
+                .rounded()
+                .subtract(Math.floor(MapAttributes.indexesPerTile / 2));
+            url = `${SitesAdder.sitePrefix}${previousZoom}/lat/${upperLayer.lat}/lon/${upperLayer.lon}/site.json`;
+        }
         this.defaultJson.layers.push({
             data: zoomUpLayerArray,
             name: 'zoom-up-layer',

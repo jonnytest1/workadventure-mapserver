@@ -23,7 +23,7 @@ export class ApiProxy {
                 ApiProxy.apiCache = await response.json();
                 MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
                     const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
-                    if (apiUsers.length == 1) {
+                    if (apiUsers.length <= 1) {
                         return null;
                     }
 
