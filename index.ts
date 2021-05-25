@@ -42,7 +42,7 @@ updateDatabase(__dirname + '/resources/mapserver/models')
                     }
 
                     if (!req.user) {
-                        if (req.method !== 'GET' || req.path.endsWith('.js') || req.path.endsWith('/message.html')) {
+                        if (req.method !== 'GET' || req.path.endsWith('/message.html')) {
                             console.log(`createing new user at ${req.path} with ${req.method}`)
                             req.user = new User(uuid());
                             await save(req.user);

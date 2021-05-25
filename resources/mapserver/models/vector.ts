@@ -83,6 +83,12 @@ export class Vector {
         return newVector;
     }
 
+    withLon(newLon: number) {
+        const newVector: this = this.clone();
+        newVector.lon = newLon;
+        return newVector;
+    }
+
     toString() {
         return `{"lat":${this.lat},"lon":${this.lon}}`;
     }

@@ -33,6 +33,9 @@ export class MapResolver extends MapAttributes {
 
     readonly startIndex: number;
 
+
+    readonly indexPerTile = new Vector(MapAttributes.indexesPerTile, MapAttributes.indexesPerTile)
+
     startPoint = { loc: new GeoLocation(0, 0), amount: 0, sites: new Array<TilePixel>() };
     layerStart: Vector;
     layerEnd: Vector;
@@ -107,9 +110,9 @@ export class MapResolver extends MapAttributes {
                     transparentcolor: '#fff',
                     firstgid: startGid
                 });
-                for (let tileColumn = 0; tileColumn < MapResolver.indexesPerTile; tileColumn++) {
-                    for (let tileRow = 0; tileRow < MapResolver.indexesPerTile; tileRow++) {
-                        const tileIndex = tileColumn * MapResolver.indexesPerTile + tileRow;
+                for (let tileColumn = 0; tileColumn < this.indexPerTile.lat; tileColumn++) {
+                    for (let tileRow = 0; tileRow < this.indexPerTile.lon; tileRow++) {
+                        const tileIndex = tileColumn * this.indexPerTile.lat + tileRow;
                         const dataIndex = this.toIndex(i, y, tileColumn, tileRow);
 
                         dataArray[dataIndex - this.startIndex] = startGid + tileIndex;
@@ -204,9 +207,12 @@ export class MapResolver extends MapAttributes {
         const previousZoom = this.zoom - MapResolver.zoomIncrement;
         let url = '/_/global/jonnytest1.github.io/workadventuremap/space/space.json';
 
-        const zoomUpLayerArray = Array(this.completeIndexArraySize)
-            .fill(0);
-        zoomUpLayerArray[zoomUpLayerArray.length - 1] = 4;
+        const zoomUpLayerArray = this.arrayWithTileAt(
+            new Vector(this.layerAmount - 1, 0),
+            this.indexPerTile.subtract(1, 0).withLon(0),
+            4
+        )
+
         if (previousZoom >= MapResolver.worldZoom) {
             const amountOfIndicesInPreviousZoom = MapResolver.getAmountOfIndicesForZoom(previousZoom);
             const amountOFIndicesInCurrentZoom = MapResolver.getAmountOfIndicesForZoom(this.zoom);
@@ -242,6 +248,15 @@ export class MapResolver extends MapAttributes {
     toIndex(bigX, bigY, tileColumn, tileRow) {
         const rowStart = ((MapResolver.indexesPerTile * bigX) + tileColumn) * this.indexesInCompleteRow;
         return rowStart + (bigY * MapResolver.indexesPerTile) + tileRow;
+    }
+
+
+    arrayWithTileAt(tilePos: Vector, indexPos: Vector, index: number) {
+        const layerArray = Array(this.completeIndexArraySize)
+            .fill(0);
+        const arrayPos = this.toIndex(tilePos.lat, tilePos.lon, indexPos.lat, indexPos.lon)
+        layerArray[arrayPos] = index
+        return layerArray;
     }
 
 }
