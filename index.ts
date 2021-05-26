@@ -5,7 +5,9 @@ import { load, save, updateDatabase } from 'hibernatets';
 import { v4 as uuid } from 'uuid';
 import { MessageCommunciation } from './resources/mapserver/message-communication';
 import { User } from './resources/mapserver/user/user';
+import "./util/fetch";
 const express = require('express');
+
 
 config({
     path: __dirname + '/.env'

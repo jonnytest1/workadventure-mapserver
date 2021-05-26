@@ -2,7 +2,7 @@ import { GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { ApiUser, MapJson, Position, RoomMap, UserObj } from '../../public/users';
 import { MessageCommunciation } from './message-communication';
-const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
+//const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
 export class ApiProxy {
 
     static roomJsons: { [room: string]: MapJson } = {};
@@ -16,9 +16,11 @@ export class ApiProxy {
 
     static apiCache = null;
 
+    fetchAnyways: number = 1
+
     constructor() {
         setInterval(async () => {
-            if (MessageCommunciation.hasUsers()) {
+            if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
                 const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
                 ApiProxy.apiCache = await response.json();
                 MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
@@ -32,6 +34,7 @@ export class ApiProxy {
                         data: apiUsers
                     };
                 });
+                this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
             }
         }, 1000);
     }
