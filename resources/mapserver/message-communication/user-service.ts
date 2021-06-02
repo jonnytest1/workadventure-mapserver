@@ -10,7 +10,7 @@ import { UserAttributeMap } from '../user/user-attribute';
 import { FriendshipService } from './friendship-service';
 
 const properties = ['nickName', 'pusherUuid', 'autoOpenGameOverlay', 'shownCookieHint', 'trackedUser'] as const;
-const publicUserAttributes = ['previousMap', 'items'] as const;
+const publicUserAttributes = ['previousMap', 'items', "shownZoomUpUpdate"] as const;
 type userProsp<T extends ReadonlyArray<keyof User>> = T;
 type userAttributes<T extends ReadonlyArray<keyof UserAttributeMap>> = T;
 type TypeSafeUserProperties = userProsp<typeof properties>;

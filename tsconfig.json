@@ -3,13 +3,22 @@
     "compilerOptions": {
         "module": "commonjs",
         "baseUrl": "./",
+        "paths": {
+            "@jonnygithub/*": [
+                "../jonny-maps/scripts/*"
+            ]
+        },
         "moduleResolution": "node",
+        "allowJs": true,
+        "checkJs": true,
         "target": "es6",
+        "resolveJsonModule": true,
         "emitDecoratorMetadata": true,
         "useDefineForClassFields": true,
+        // "traceResolution": true,
         "typeRoots": [
             "node_modules/@types",
-            "customTypes/*"
+            "customTypes/*",
         ],
         "experimentalDecorators": true,
         "outDir": "compiledjs/shutup",
@@ -19,6 +28,10 @@
         ]
     },
     "include": [
-        "./"
-    ]
+        "./public/**/*",
+        "./resources/**/*",
+        "./test/**/*",
+        "./util/**/*",
+        "../jonny-maps/scripts"
+    ],
 }
