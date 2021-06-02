@@ -24,9 +24,6 @@ export class ImageResolver {
             tempTile.data = buffer
             return tempTile
         } catch (e) {
-
-
-
             let loadedTile = await load(Tile, t => {
                 t.zoom = tempTile.zoom;
                 t.x = tempTile.x;

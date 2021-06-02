@@ -2,12 +2,13 @@ import { GET, HttpResponse, Path, ResponseCodeError } from 'express-hibernate-wr
 import { promises } from 'fs';
 import { join } from 'path';
 
+
 @Path('start/:uuid')
 export class StartMap {
 
-    @GET({ path: ":resource" })
-    @GET({ path: ":resource/:p1" })
-    @GET({ path: ":resource/:p1/:p2" })
+    @GET({ path: ":resource", attributes: { needsUser: false } })
+    @GET({ path: ":resource/:p1", attributes: { needsUser: false } })
+    @GET({ path: ":resource/:p1/:p2", attributes: { needsUser: false } })
     async getResource(req, res: HttpResponse) {
 
         const path = req.params.resource;

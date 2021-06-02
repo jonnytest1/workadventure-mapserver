@@ -19,7 +19,7 @@ export class Mapserver {
 
     private static addressResolver = new AddressResolver();
 
-    @POST({ path: 'register' })
+    @POST({ path: 'register', attributes: { needsUser: false } })
     async registerGitHub(req: HttpRequest, res: HttpResponse) {
 
         /*if (!req.body.url.endsWith('.json')&&req.body.url) {
@@ -51,14 +51,14 @@ export class Mapserver {
         }*/
     }
 
-    @GET({ path: '' })
+    @GET({ path: '', attributes: { needsUser: false } })
     async index(req, res: HttpResponse) {
         res.redirect('../../../mapserver/register.html');
     }
 
-    @GET({ path: 'mapscript.js' })
-    @GET({ path: '/world/mapscript.js' })
-    @GET({ path: ':_/lat/:_/lon/:_/mapscript.js' })
+    @GET({ path: 'mapscript.js', attributes: { needsUser: false } })
+    @GET({ path: '/world/mapscript.js', attributes: { needsUser: false } })
+    @GET({ path: ':_/lat/:_/lon/:_/mapscript.js', attributes: { needsUser: false } })
     async getMapScript(req: HttpRequest<User>, res: HttpResponse) {
         const resource = join(__dirname, '../../public/mapscript.js');
 
@@ -68,9 +68,9 @@ export class Mapserver {
             .send(buffer);
     }
 
-    @GET({ path: 'image/:zoom/:x/:y.png' })
-    @GET({ path: '/world/image/:zoom/:x/:y.png' })
-    @GET({ path: ':_/lat/:_/lon/:_/image/:zoom/:x/:y.png' })
+    @GET({ path: 'image/:zoom/:x/:y.png', attributes: { needsUser: false } })
+    @GET({ path: '/world/image/:zoom/:x/:y.png', attributes: { needsUser: false } })
+    @GET({ path: ':_/lat/:_/lon/:_/image/:zoom/:x/:y.png', attributes: { needsUser: false } })
     async countryimage(req: HttpRequest, res: HttpResponse) {
 
 
@@ -83,10 +83,10 @@ export class Mapserver {
             .send(Buffer.from(await tile.data));
 
     }
-    @GET({ path: 'usermap/assets/:image' })
-    @GET({ path: 'assets/:image' })
-    @GET({ path: '/world/assets/:image' })
-    @GET({ path: ':zoom/lat/:tileX/lon/:tileY/assets/:image' })
+    @GET({ path: 'usermap/assets/:image', attributes: { needsUser: false } })
+    @GET({ path: 'assets/:image', attributes: { needsUser: false } })
+    @GET({ path: '/world/assets/:image', attributes: { needsUser: false } })
+    @GET({ path: ':zoom/lat/:tileX/lon/:tileY/assets/:image', attributes: { needsUser: false } })
     async assets(req, res) {
         const path = req.params.image;
         if (path.includes('..') || path.includes('/')) {
@@ -99,8 +99,8 @@ export class Mapserver {
             .send(buffer);
     }
 
-    @GET({ path: 'site.json' })
-    @GET({ path: '/world/site.json' })
+    @GET({ path: 'site.json', attributes: { needsUser: false } })
+    @GET({ path: '/world/site.json', attributes: { needsUser: false } })
     async getRenderedSite(req: HttpRequest, res) {
         if (req.path.includes('/world/site.json')) {
             const worldMapJsonString = await new MapResolver().getWorldMapJson();
@@ -119,7 +119,7 @@ export class Mapserver {
             .send(topLevelJsonString);
     }
 
-    @GET({ path: ':zoom/lat/:tileX/lon/:tileY/site.json' })
+    @GET({ path: ':zoom/lat/:tileX/lon/:tileY/site.json', attributes: { needsUser: false } })
     async getRenderedSiteForPosition(req: HttpRequest, res: HttpResponse) {
         if (!req.params.zoom || isNaN(+req.params.zoom)) {
             res.status(400)
