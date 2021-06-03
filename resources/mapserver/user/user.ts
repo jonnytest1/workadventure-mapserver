@@ -46,9 +46,13 @@ export class User {
     @column()
     referenceUuid: string;
 
+    @column()
+    lastDefaultUserUpdate: string
+
     @mapping(Mappings.OneToMany, UserAttribute, 'userRef', {
         loadType: 'map'
     })
+    
     attributes = new ExtendedMap<UserAttribute, UserAttributeMap>(UserAttribute);
 
     @mapping(Mappings.OneToMany, InventoryItem, 'userRef')

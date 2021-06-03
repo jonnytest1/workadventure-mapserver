@@ -44,10 +44,10 @@ export class UserService {
     }
 
     userUpdate(data: UserUpdateEvent & Object, req: HttpRequest<User>) {
-
+        req.user.lastDefaultUserUpdate = new Date().toISOString()
         for (let property of properties) {
             const prop: string = property;
-            if (data.hasOwnProperty(property)) {
+            if (data.hasOwnProperty(property) && req.user[prop] !== data[prop]) {
                 req.user[prop] = data[prop];
             }
         }
