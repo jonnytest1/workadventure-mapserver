@@ -20,21 +20,25 @@ export class ApiProxy {
 
     constructor() {
         setInterval(async () => {
-            if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
-                const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
-                ApiProxy.apiCache = await response.json();
-                MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
-                    const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
-                    if (apiUsers.length <= 1) {
-                        return null;
-                    }
+            try {
+                if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
+                    const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+                    ApiProxy.apiCache = await response.json();
+                    MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
+                        const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
+                        if (apiUsers.length <= 1) {
+                            return null;
+                        }
 
-                    return {
-                        type: 'positionUpdate',
-                        data: apiUsers
-                    };
-                });
-                this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
+                        return {
+                            type: 'positionUpdate',
+                            data: apiUsers
+                        };
+                    });
+                    this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
+                }
+            } catch (e) {
+                console.error(e)
             }
         }, 1000);
     }
