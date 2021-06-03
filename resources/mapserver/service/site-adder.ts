@@ -1,5 +1,4 @@
 import { load } from 'hibernatets';
-import { Mapserver } from '../mapserver';
 import { BoundingBox } from '../models/bounding-box';
 import { Site } from '../models/site';
 import { SiteTilePosition } from '../models/site-tile-position';
