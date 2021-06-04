@@ -1,46 +1,69 @@
 import { GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
 import { ApiUser, MapJson, Position, RoomMap, UserObj } from '../../public/users';
+import { MemoryCache } from '../../util/memory-cache';
 import { MessageCommunciation } from './message-communication';
 //const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
 export class ApiProxy {
 
-    static roomJsons: { [room: string]: MapJson } = {};
-
-    private static pusherIdCache: {
-        [pusherId: string]: {
-            timestamp: number,
-            userRef: string
+    static roomJsons = new MemoryCache<MapJson>({
+        duration: 1000 * 60 * 60,
+        generator: async key => {
+            const finalMapUrl = 'https://' + key.replace('_/global/', '');
+            if (!finalMapUrl.includes('localhost')) {
+                const response = await fetch(finalMapUrl);
+                return response.json();
+            }
+            return null;
         }
-    } = {};
+    });
+
+    private static pusherIdCache = new MemoryCache<string>({
+        duration: 1000 * 60 * 2,
+        multipleGenerator: async pusherUuids => {
+            const queryResult = await new DataBaseBase()
+                .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
+
+            const tempMap = {}
+            queryResult.forEach(result => {
+                tempMap[result.pusherUuid] = result.referenceUuid
+            })
+            return pusherUuids.map(pUId => tempMap[pUId])
+        }
+    })
 
     static apiCache = null;
 
     fetchAnyways: number = 1
 
     constructor() {
-        setInterval(async () => {
-            try {
-                if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
-                    const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
-                    ApiProxy.apiCache = await response.json();
-                    MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
-                        const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
-                        if (apiUsers.length <= 1) {
-                            return null;
-                        }
+        this.userDumpLoop()
+    }
 
-                        return {
-                            type: 'positionUpdate',
-                            data: apiUsers
-                        };
-                    });
-                    this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
-                }
-            } catch (e) {
-                console.error(e)
+    async userDumpLoop() {
+        try {
+            if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
+                const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+                ApiProxy.apiCache = await response.json();
+                MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
+                    const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
+                    if (apiUsers.length <= 1) {
+                        return null;
+                    }
+
+                    return {
+                        type: 'positionUpdate',
+                        data: apiUsers
+                    };
+                });
+                this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
             }
-        }, 1000);
+        } catch (e) {
+            console.error(e)
+        }
+        setTimeout(() => {
+            this.userDumpLoop();
+        }, 1000)
     }
 
     async getAllUsersForPusherId(pusherId: string) {
@@ -72,53 +95,22 @@ export class ApiProxy {
                     slug: dump[room].roomSlug,
                     users: []
                 };
-
-                if (!ApiProxy.roomJsons[room]) {
-                    const finalMapUrl = 'https://' + room.replace('_/global/', '');
-                    if (!finalMapUrl.includes('localhost')) {
-                        const response = await fetch(finalMapUrl);
-                        ApiProxy.roomJsons[room] = await response.json();
-                    }
-
-                }
             }
 
             for (let index in dump[room].users) {
                 const dumpUser = dump[room].users[index];
-                this.parseUser(dumpUser, roomMap[room].users, userObjectMap, room);
+                await this.parseUser(dumpUser, roomMap[room].users, userObjectMap, room);
             }
         }
 
         const pusherKeys = [...userObjectMap.keys()];
-        const pusherUuids = pusherKeys.filter(uuid => {
-            if (!ApiProxy.pusherIdCache[uuid]) {
-                return true;
-            }
-            if (ApiProxy.pusherIdCache[uuid].timestamp < (Date.now() - (1000 * 60 * 5))) {
-                return true;
-            }
-            return false;
-        });
-        if (pusherUuids.length) {
-            const queryResult = await new DataBaseBase()
-                .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
 
-            for (const obj of queryResult) {
-                ApiProxy.pusherIdCache[obj.pusherUuid] = {
-                    timestamp: Date.now(),
-                    userRef: obj.referenceUuid
-                };
-            }
-        }
+        const keyMap = await ApiProxy.pusherIdCache.getAll(pusherKeys);
+
         pusherKeys.forEach(pusherKey => {
-            if (!ApiProxy.pusherIdCache[pusherKey]) {
-                ApiProxy.pusherIdCache[pusherKey] = {
-                    timestamp: Date.now() - (1000 * 60 * 2),
-                    userRef: null
-                };
-            }
-            userObjectMap.get(pusherKey).userRefereneUuid = ApiProxy.pusherIdCache[pusherKey].userRef;
-        });
+            userObjectMap.get(pusherKey).userRefereneUuid = keyMap[pusherKey]
+        })
+
         if (!containsIds) {
             userObjectMap.forEach(uO => {
                 delete uO.pusherUuid;
@@ -127,7 +119,7 @@ export class ApiProxy {
         return roomMap;
     }
 
-    private parseUser(user: UserObj, userList: Array<ApiUser>, glboalUserMap: Map<string, ApiUser>, room: string) {
+    private async parseUser(user: UserObj, userList: Array<ApiUser>, glboalUserMap: Map<string, ApiUser>, room: string) {
         if (typeof user === 'string') {
             return;
         }
@@ -136,7 +128,7 @@ export class ApiProxy {
             name: user.name,
             joinedAt: user.joinedAt,
             position: user.position,
-            jitsiRoom: this.getJitsiKeyForPosition(room, user.position),
+            jitsiRoom: await this.getJitsiKeyForPosition(room, user.position),
             pusherUuid: user.uuid,
             userRefereneUuid: null
         };
@@ -149,7 +141,7 @@ export class ApiProxy {
                     for (let zoneInner of zoneTop) {
                         if (zoneInner && zoneInner.things) {
                             for (const thing of zoneInner.things) {
-                                this.parseUser(thing, userList, glboalUserMap, room);
+                                await this.parseUser(thing, userList, glboalUserMap, room);
                             }
                         }
                     }
@@ -158,22 +150,23 @@ export class ApiProxy {
         }
     }
 
-    getJitsiKeyForPosition(room, position: Position) {
+    async getJitsiKeyForPosition(room, position: Position) {
         if (!position) {
             return null;
         }
         const playerX = position.x / 32;
         const playery = position.y / 32;
 
-        if (!ApiProxy.roomJsons[room]) {
+        const map = await ApiProxy.roomJsons.get(room);
+        if (!map) {
             return 'invalidmapref';
         }
 
-        if (!(ApiProxy.roomJsons[room].layers instanceof Array)) {
+        if (!(map.layers instanceof Array)) {
             console.log('layers is no array');
             return null
         }
-        for (const layer of ApiProxy.roomJsons[room].layers) {
+        for (const layer of map.layers) {
             if (!layer.properties) {
                 continue;
             }
