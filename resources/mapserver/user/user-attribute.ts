@@ -13,6 +13,7 @@ export type UserAttributeMap = {
     maxTileSetIndex: number
     shownZoomUpUpdate: boolean
     devicePixelRatio: number
+    userAgent: string
 };
 
 type MapType<O, T extends Partial<{ [Key in keyof O]: any }>> = { [key in keyof O]: key extends keyof T ? T[key] : unknown };
