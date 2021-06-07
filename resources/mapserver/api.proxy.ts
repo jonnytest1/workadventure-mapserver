@@ -56,7 +56,7 @@ export class ApiProxy {
                         data: apiUsers
                     };
                 });
-                this.fetchAnyways = MessageCommunciation.hasUsers() ? 5 : this.fetchAnyways - 1
+                this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1
             }
         } catch (e) {
             console.error(e)

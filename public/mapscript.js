@@ -1,7 +1,6 @@
 
 ///<reference path="../../jonny-maps/scripts/index.d.ts" />
 
-
 setTimeout(async () => {
     //@ts-ignore
     const [{ getUserData }, { message, backendDomain }] = await Promise.all([
