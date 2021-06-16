@@ -48,13 +48,19 @@ export interface UserObj {
 
 
 export interface MapJson {
-    layers: Array<{
-        properties: Array<{
-            name: string,
-            value: string
-        }>
-        data: Array<number>
-        width: number
-    }>;
+    layers: Array<Layer>;
 
+}
+
+export interface Layer {
+    properties?: Array<{
+        name: string,
+        value: string
+    }>
+    data: Array<number>
+    width: number
+
+    type: "group" | "tileLayer",
+
+    layers?: Array<Layer>
 }

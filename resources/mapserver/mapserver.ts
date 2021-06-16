@@ -127,7 +127,10 @@ export class Mapserver {
             return;
         }
         let zoom = +req.params.zoom;
-        zoom = Math.min(18, zoom);
+        if (zoom > 18) {
+            throw new ResponseCodeError(400, "zoom level too high")
+        }
+
         const mapReolver = new MapResolver(zoom, +req.params.tileX, +req.params.tileY, MapAttributes.layerSizePerMap);
         const worldMapJsonString = await mapReolver.getWorldMapJson();
         res.set('Content-Type', 'application/json')

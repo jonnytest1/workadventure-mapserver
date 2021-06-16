@@ -71,6 +71,7 @@ export class SitesAdder extends MapAttributes {
                     .keys()].length === 1) {
                     newZoom += MapResolver.zoomIncrement;
                 }
+                newZoom = Math.min(18, newZoom)
 
                 const targetSite = exampleSite.getLocation()
                     .toTilePixel(newZoom)

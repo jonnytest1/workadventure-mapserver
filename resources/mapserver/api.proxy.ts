@@ -1,6 +1,6 @@
 import { GET, HttpRequest, HttpResponse } from 'express-hibernate-wrapper';
 import { DataBaseBase } from 'hibernatets/mariadb-base';
-import { ApiUser, MapJson, Position, RoomMap, UserObj } from '../../public/users';
+import { ApiUser, Layer, MapJson, Position, RoomMap, UserObj } from '../../public/users';
 import { MemoryCache } from '../../util/memory-cache';
 import { MessageCommunciation } from './message-communication';
 //const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
@@ -19,7 +19,7 @@ export class ApiProxy {
     });
 
     private static pusherIdCache = new MemoryCache<string>({
-        duration: 1000 * 60 * 2,
+        duration: 1000 * 60 * 20,
         multipleGenerator: async pusherUuids => {
             const queryResult = await new DataBaseBase()
                 .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
@@ -167,9 +167,20 @@ export class ApiProxy {
             return null
         }
         for (const layer of map.layers) {
-            if (!layer.properties) {
+            if (!layer.properties && layer.type !== "group") {
                 continue;
             }
+            const jitisName = this.getJitsiNameFromLayer(layer, playerX, playery);
+            if (jitisName) {
+                return jitisName;
+            }
+        }
+        return null;
+    }
+
+    getJitsiNameFromLayer(layer: Layer, playerX, playery) {
+
+        if (layer.properties) {
             const jitsiRoomName = layer.properties.find(prop => prop.name === 'jitsiRoom');
             if (jitsiRoomName) {
                 const firstIndex = layer.data.findIndex(num => num !== 0);
@@ -189,7 +200,14 @@ export class ApiProxy {
                 }
             }
         }
+        if (layer.layers) {
+            for (const subLayer of layer.layers) {
+                const jitsiName = this.getJitsiNameFromLayer(subLayer, playerX, playery);
+                if (jitsiName) {
+                    return jitsiName
+                }
+            }
+        }
         return null;
     }
-
 }
