@@ -58,6 +58,10 @@ export class ApiProxy {
                 });
                 this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1
             }
+            //fetching every 10 minutes anyways
+            if (this.fetchAnyways < (60 * 10)) {
+                this.fetchAnyways = 1
+            }
         } catch (e) {
             console.error(e)
         }
