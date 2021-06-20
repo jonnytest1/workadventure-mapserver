@@ -32,6 +32,7 @@ function updateUsers() {
             for(let i = table.children.length - 1; i >= 1; i--) {
                 table.children[i].remove();
             }
+            let count = 0;
             for(let key in json) {
                 const tableRow = document.createElement('tr');
                 const roomName = document.createElement('td');
@@ -42,7 +43,7 @@ function updateUsers() {
                 tableRow.appendChild(roomName);
                 tableRow.appendChild(userContainerCell);
                 for(const user of json[key].users) {
-
+                    count++;
                     const userEntry = document.createElement('li');
 
                     const joinedAt = new Date(user.joinedAt);
@@ -78,6 +79,12 @@ function updateUsers() {
                 }
                 table.appendChild(tableRow);
             }
+
+            document.title = `${count} Workadventure`
+            window.parent.postMessage(JSON.stringify({
+                title: document.title
+            }), "*")
+
 
             const after = document.createElement('tr');
             after.innerHTML = `<td>lastcheck : ${new Date().toLocaleTimeString()}</td>`;
