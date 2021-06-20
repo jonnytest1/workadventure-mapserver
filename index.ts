@@ -22,25 +22,41 @@ updateDatabase(__dirname + '/resources/mapserver')
                         next()
                         return;
                     }
+
+
+                    const deepSettings = {
+                        first: true as const,
+                        deep: {
+                            friends: 'TRUE=TRUE',
+                            friendedUser: {
+                                depths: 4,
+                                filter: 'TRUE=TRUE'
+                            },
+                            attributes: 'TRUE=TRUE',
+                            inventory: 'TRUE=TRUE'
+                        }
+                    }
+
                     if (!req.user && req.cookies.user && req.attributes?.needsUser !== false) {
                         try {
-                            req.user = await load(User, u => u.cookie = req.cookies.user, undefined, {
-                                first: true,
-                                deep: {
-                                    friends: 'TRUE=TRUE',
-                                    friendedUser: {
-                                        depths: 4,
-                                        filter: 'TRUE=TRUE'
-                                    },
-                                    attributes: 'TRUE=TRUE',
-                                    inventory: 'TRUE=TRUE'
-                                }
+                            req.user = await load(User, `cookie = ?`, [req.cookies.user], deepSettings);
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                    if (!req.user && !req.cookies.user && req.attributes?.needsUser !== false && req.query.pusheruuid) {
+                        try {
+                            req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings)
+                            res.cookie('user', req.user.cookie, {
+                                expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
+                                httpOnly: true,
+                                secure: true,
+                                sameSite: 'none'
                             });
                         } catch (e) {
                             console.error(e);
                         }
                     }
-
                     if (!req.user) {
                         if (req.method !== 'GET' && req.method !== 'HEAD' || req.path.endsWith('/message.html')) {
                             console.log(`createing new user at ${req.path} with ${req.method}`)
