@@ -108,7 +108,7 @@ export class MessageCommunciation {
                 if (data.type === '__proto__') {
                     return;
                 }
-                req.user = this.websockets[userId].user;
+                req.user = this.websockets[userId]?.user || req.user;
 
                 let responseJson = await messageHandlers[data.type]({ ...data.data }, req, ws);
                 if (responseJson === 'no-response') {
