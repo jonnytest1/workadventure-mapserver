@@ -37,49 +37,54 @@ updateDatabase(__dirname + '/resources/mapserver')
                         }
                     }
 
-                    if (!req.user && req.cookies.user && req.attributes?.needsUser !== false) {
-                        try {
-                            req.user = await load(User, `cookie = ?`, [req.cookies.user], deepSettings);
-                        } catch (e) {
-                            console.error(e);
+                    if (req.attributes?.needsUser !== false) {
+
+                        if (!req.user && req.cookies.user) {
+                            try {
+                                req.user = await load(User, `cookie = ?`, [req.cookies.user], deepSettings);
+                            } catch (e) {
+                                console.error(e);
+                            }
                         }
-                    }
-                    if (!req.user && !req.cookies.user && req.attributes?.needsUser !== false && req.query.pusheruuid) {
-                        try {
-                            req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings)
-                            res.cookie('user', req.user.cookie, {
-                                expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
-                                httpOnly: true,
-                                secure: true,
-                                sameSite: 'none'
-                            });
-                        } catch (e) {
-                            console.error(e);
+                        if (!req.user && !req.cookies.user && req.query.pusheruuid) {
+                            try {
+                                req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings)
+                                res.cookie('user', req.user.cookie, {
+                                    expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
+                                    httpOnly: true,
+                                    secure: true,
+                                    sameSite: 'none'
+                                });
+                            } catch (e) {
+                                console.error(e);
+                            }
                         }
-                    }
-                    if (!req.user) {
-                        if (req.method !== 'GET' && req.method !== 'HEAD' || req.path.endsWith('/message.html')) {
-                            console.log(`createing new user at ${req.path} with ${req.method}`)
-                            req.user = new User(uuid());
-                            await save(req.user);
-                            res.cookie('user', req.user.cookie, {
-                                expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
-                                httpOnly: true,
-                                secure: true,
-                                sameSite: 'none'
-                            });
+                        if (!req.user && !req.cookies.user) {
+                            if (req.method !== 'GET' && req.method !== 'HEAD' || req.path.endsWith('/message.html')) {
+                                console.log(`createing new user at ${req.path} with ${req.method}`)
+                                req.user = new User(uuid());
+                                await save(req.user);
+                                res.cookie('user', req.user.cookie, {
+                                    expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
+                                    httpOnly: true,
+                                    secure: true,
+                                    sameSite: 'none'
+                                });
+                            } else {
+                                if (!req.path.endsWith('.png')) {
+                                    console.log(`didnt set cookies for ${req.path}`);
+                                }
+                            }
                         } else {
-                            if (!req.path.endsWith('.png')) {
-                                console.log(`didnt set cookies for ${req.path}`);
+                            if (!req.user.referenceUuid) {
+                                req.user.referenceUuid = uuid();
+                            }
+                            if (MessageCommunciation.websockets[req.user.id]) {
+                                MessageCommunciation.websockets[req.user.id].user = req.user;
                             }
                         }
                     } else {
-                        if (!req.user.referenceUuid) {
-                            req.user.referenceUuid = uuid();
-                        }
-                        if (MessageCommunciation.websockets[req.user.id]) {
-                            MessageCommunciation.websockets[req.user.id].user = req.user;
-                        }
+                        console.log("doesnt need user")
                     }
                     next();
                 });

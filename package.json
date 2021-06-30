@@ -11,7 +11,7 @@
     "base64url": "^3.0.1",
     "cookie-parser": "^1.4.5",
     "dotenv": "",
-    "express-hibernate-wrapper": "^1.0.12",
+    "express-hibernate-wrapper": "^1.0.15",
     "express-session": "^1.17.1",
     "express-ws": "^4.0.0",
     "hibernatets": "^1.0.67",

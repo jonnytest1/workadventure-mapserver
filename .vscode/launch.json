@@ -13,6 +13,20 @@
             "localRoot": "${workspaceFolder}",
             "remoteRoot": "/var/node",
             "restart": true
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "start MapServer",
+            "autoAttachChildProcesses": true,
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "args": [
+                "${workspaceFolder}\\index.ts"
+            ],
+            "internalConsoleOptions": "openOnFirstSessionStart"
         }
     ]
 }
