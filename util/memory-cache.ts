@@ -6,10 +6,16 @@ export class MemoryCache<T>{
         }
     } = {}
 
+    private keyLoader: {
+        [key: string]: Promise<void | {
+            [key: string]: T;
+        }>
+    } = {}
+
     constructor(private options: {
         duration: number,
         generator?: (key: string) => Promise<T>
-        multipleGenerator?: (key: Array<string>) => Promise<Array<T>>
+        multipleGenerator?: (key: Array<string>) => Promise<{ [key: string]: T }>
     }) {
 
     }
@@ -39,25 +45,67 @@ export class MemoryCache<T>{
     async getAll(keys: Array<string>) {
         this.cleanup()
 
-        const missing = keys.filter(key => !this.cacheData[key]);
+        const missing = []
 
-        if (missing.length) {
-            let values: Array<T>;
-            if (this.options.multipleGenerator) {
-                values = await this.options.multipleGenerator(missing);
-            } else {
-                values = await Promise.all(missing.map(missingKey => this.options.generator(missingKey)))
-            }
+        const alreadyLoading = []
 
-            for (let i = 0; i < missing.length; i++) {
-                this.cacheData[missing[i]] = {
-                    timestamp: Date.now(),
-                    data: values[i]
+        for (const key of keys) {
+            if (!this.cacheData[key]) {
+                if (this.keyLoader[key]) {
+                    alreadyLoading.push(key)
+                } else {
+                    missing.push(key)
                 }
             }
         }
+
+        await Promise.all([
+            this.getAlreadyLoading(alreadyLoading),
+            this.getMissing(missing)
+        ])
+
         let keyObj: { [key: string]: T } = {}
         keys.forEach(key => keyObj[key] = this.cacheData[key].data)
         return keyObj
+    }
+
+    private async getMissing(missing) {
+        if (missing.length) {
+            let values: { [key: string]: T };
+
+            if (this.options.multipleGenerator) {
+                const multiple = this.options.multipleGenerator(missing)
+                for (let missingStr of missing) {
+                    this.keyLoader[missingStr] = multiple;
+                }
+                values = await multiple;
+                for (let i = 0; i < missing.length; i++) {
+                    this.cacheData[missing[i]] = {
+                        timestamp: Date.now(),
+                        data: values[missing[i]]
+                    }
+                    delete this.keyLoader[missing[i]];
+                }
+            } else {
+                await Promise.all(missing.map(missing => {
+                    const promise = (async () => {
+                        this.cacheData[missing] = {
+                            timestamp: Date.now(),
+                            data: await this.options.generator(missing)
+                        }
+                        delete this.keyLoader[missing];
+                    })()
+                    this.keyLoader[missing] = promise
+                    return promise;
+                }))
+            }
+
+        }
+    }
+
+    private async getAlreadyLoading(alreadyLoading: Array<string>): Promise<void[]> {
+        return Promise.all(alreadyLoading.map(async loadingKey => {
+            await this.keyLoader[loadingKey];
+        }))
     }
 }

@@ -13,7 +13,7 @@ describe('test', () => {
         expect(tp.zoom)
             .toBe(6);
         expect(tile.x)
-            .toBe(1.5);
+            .toBe(2);
     });
 
     it('convert json', () => {

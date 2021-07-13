@@ -51,16 +51,16 @@ export class MessageCommunciation {
         return true;
     }
 
-    static sendForAllUsersByPusherId(callback: (pusherId: string) => any) {
-        Object.keys(MessageCommunciation.websockets)
-            .forEach(async userId => {
-                const websocketObj = MessageCommunciation.websockets[userId];
-                const objectToSend = await callback(websocketObj.pusherUuid);
-                if (objectToSend !== null && websocketObj.ws.readyState !== websocketObj.ws.CLOSED) {
-                    websocketObj.ws.send(JSON.stringify(objectToSend));
-                }
+    static async sendForAllUsersByPusherId(callback: (pusherId: string) => any) {
 
-            });
+        for (const userId of Object.keys(MessageCommunciation.websockets)) {
+            const websocketObj = MessageCommunciation.websockets[userId];
+            const objectToSend = await callback(websocketObj.pusherUuid);
+            if (objectToSend !== null && websocketObj.ws.readyState !== websocketObj.ws.CLOSED) {
+                websocketObj.ws.send(JSON.stringify(objectToSend));
+            }
+        }
+
 
     }
 

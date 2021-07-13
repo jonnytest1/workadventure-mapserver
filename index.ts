@@ -49,12 +49,14 @@ updateDatabase(__dirname + '/resources/mapserver')
                         if (!req.user && !req.cookies.user && req.query.pusheruuid) {
                             try {
                                 req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings)
-                                res.cookie('user', req.user.cookie, {
-                                    expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
-                                    httpOnly: true,
-                                    secure: true,
-                                    sameSite: 'none'
-                                });
+                                if (req.user) {
+                                    res.cookie('user', req.user.cookie, {
+                                        expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
+                                        httpOnly: true,
+                                        secure: true,
+                                        sameSite: 'none'
+                                    });
+                                }
                             } catch (e) {
                                 console.error(e);
                             }
@@ -76,7 +78,7 @@ updateDatabase(__dirname + '/resources/mapserver')
                                 }
                             }
                         } else {
-                            if (!req.user.referenceUuid) {
+                            if (req.user && !req.user.referenceUuid) {
                                 req.user.referenceUuid = uuid();
                             }
                             if (MessageCommunciation.websockets[req.user.id]) {
