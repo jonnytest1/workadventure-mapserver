@@ -205,7 +205,7 @@ export class MapResolver extends MapAttributes {
     private addZoomUpIcon() {
 
         const previousZoom = this.zoom - MapResolver.zoomIncrement;
-        let url = '/_/global/jonnytest1.github.io/workadventuremap/space/space.json';
+        let url = 'https://jonnytest1.github.io/workadventuremap/space/space.json';
 
         const zoomUpLayerArray = this.arrayWithTileAt(
             new Vector(this.layerAmount - 1, 0),

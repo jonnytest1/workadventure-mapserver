@@ -10,8 +10,8 @@ import { MapResolver } from './woirld-map-resolver';
 const houseIndex = 1;
 const cityIconIndex = 2;
 export class SitesAdder extends MapAttributes {
-
-    static readonly sitePrefix = '/_/global/pi4.e6azumuvyiabvs9s.myfritz.net/nodetype/rest/mapserver/';
+    // /_/global/pi4.e6azumuvyiabvs9s.myfritz.net
+    static readonly sitePrefix = '/mapserver/rest/mapserver/';
     layerStart: Vector;
     layerEnd: Vector;
     zoom: number;
