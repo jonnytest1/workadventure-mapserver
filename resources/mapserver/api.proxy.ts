@@ -19,8 +19,9 @@ export class ApiProxy {
     });
 
     private static pusherIdCache = new MemoryCache<string>({
-        duration: 1000 * 60 * 20,
+        duration: 1000 * 60 * 60,
         multipleGenerator: async pusherUuids => {
+            console.log("fetching pusherUuids")
             const queryResult = await new DataBaseBase()
                 .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
 
@@ -67,7 +68,7 @@ export class ApiProxy {
         }
         setTimeout(() => {
             this.userDumpLoop();
-        }, 1000)
+        }, 10000)
     }
 
     async getAllUsersForPusherId(pusherId: string) {

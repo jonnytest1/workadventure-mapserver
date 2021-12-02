@@ -10,6 +10,7 @@ export class Address {
 
     @column()
     house_number: string;
+
     @column()
     road: string;
     @column()

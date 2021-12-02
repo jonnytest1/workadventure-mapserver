@@ -2,7 +2,7 @@ const url = new URL(location.href);
 const apiToken = url.searchParams.get('apitoken');
 
 onload = () => {
-    setInterval(updateUsers(), 3000);
+    setInterval(updateUsers(), 30000);
     setTimeout(() => {
         updateUsers();
     }, 10);
@@ -15,7 +15,7 @@ onload = () => {
  * @returns { Promise<import("./users").RoomMap>}
  */
 async function fetchDump(token) {
-    const response = await fetch('https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/users?apikey=' + token);
+    const response = await fetch(`${location.origin}/mapserver/rest/users?apikey=${token}`);
     return response.json();
 
 }

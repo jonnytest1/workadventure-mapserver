@@ -8,7 +8,7 @@ setTimeout(async () => {
         require('@jonnygithub/backend-connection')
     ]);
 
-    WA.registerMenuCommand('Register your own map -basintern', () => {
+    WA.ui.registerMenuCommand('Register your own map -basintern', () => {
         WA.nav.openTab(`${backendDomain}/mapserver/register.html`);
     });
     const userData = await getUserData();

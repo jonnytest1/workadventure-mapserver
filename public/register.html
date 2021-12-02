@@ -5,8 +5,9 @@
     </head>
 
     <body>
-        <form method="POST"
-              action="https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/mapserver/register">
+        <form id="registerForm"
+              method="POST"
+              action="">
             <table>
 
                 <tr>
@@ -51,7 +52,13 @@
                 </tr>
             </table>
         </form>
-
+        <script>
+            /**
+             * @type{HTMLFormElement}
+             */
+            const form = document.querySelector("#registerForm")
+            form.action = location.origin + "/mapserver/rest/mapserver/register"
+        </script>
     </body>
 
 </html>

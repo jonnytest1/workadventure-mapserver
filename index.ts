@@ -11,7 +11,7 @@ config({
     path: __dirname + '/.env'
 });
 
-updateDatabase(__dirname + '/resources/mapserver')
+updateDatabase(__dirname + '/resources')
     .then(() => {
         initialize(__dirname + '/resources', {
             allowCors: true,
