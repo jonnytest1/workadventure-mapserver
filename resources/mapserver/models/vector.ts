@@ -1,5 +1,4 @@
 export class Vector {
-
     constructor(public lat: number, public lon: number) { }
 
     clone() {
@@ -91,5 +90,12 @@ export class Vector {
 
     toString() {
         return `{"lat":${this.lat},"lon":${this.lon}}`;
+    }
+
+    toArrayIndex(rootArray: Array<Array<unknown>> | number) {
+        if (typeof rootArray == "number") {
+            return rootArray * this.lat + this.lon;
+        }
+        return rootArray.length * this.lat + this.lon;
     }
 }

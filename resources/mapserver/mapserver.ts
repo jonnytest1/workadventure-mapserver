@@ -10,6 +10,7 @@ import { Tile } from './models/tile';
 import { AddressResolver } from './service/address-from-geo';
 import { ImageResolver } from './service/image-resolver';
 import { MapAttributes } from './service/map-attributes-holder';
+import { MinesweeperResolver } from './service/minesweeper';
 import { SitesAdder } from './service/site-adder';
 import { UserMapLoader } from './service/user-map-loader';
 import { MapResolver } from './service/woirld-map-resolver';
@@ -128,7 +129,7 @@ export class Mapserver {
         }
         let zoom = +req.params.zoom;
         if (zoom > 18) {
-            throw new ResponseCodeError(400, "zoom level too high")
+            throw new ResponseCodeError(400, "zoom level too high");
         }
 
         const mapReolver = new MapResolver(zoom, +req.params.tileX, +req.params.tileY, MapAttributes.layerSizePerMap);
@@ -151,5 +152,11 @@ export class Mapserver {
         const mapJson = await new UserMapLoader().getMapJsonForUser(user);
         res.set('Content-Type', 'application/json')
             .send(mapJson);
+    }
+
+    @GET({ path: "minesweeper.json", attributes: { needsUser: true } })
+    async getMinesweeperMap(req: HttpRequest<User>, res: HttpResponse) {
+        const resolver = MinesweeperResolver.getMapResolver(req.user);
+        res.send(await resolver.buildMap());
     }
 }

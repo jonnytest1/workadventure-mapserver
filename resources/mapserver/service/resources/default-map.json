@@ -1,11 +1,5 @@
 {
   "compressionlevel": -1,
-  "editorsettings": {
-    "export": {
-      "format": "json",
-      "target": "fire.json"
-    }
-  },
   "properties": [
     {
       "name": "script",

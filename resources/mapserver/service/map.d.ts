@@ -1,21 +1,25 @@
-export interface ILayer {
+
+export type ILayerType = "tilelayer" | 'objectgroup'
+export interface ILayer<T extends ILayerType = ILayerType> {
     data?: Array<number>;
     draworder?: "topdown";
-    objects?: Array<unknown>;
+    objects?: T extends "objectgroup" ? Array<unknown> : never;
     opacity?: number;
     height: number;
     visible?: boolean;
     id: number;
     name: string;
-    type: "tilelayer" | 'objectgroup';
+    type: T;
     width: number;
     x: number;
     y: number;
-    properties?: Array<{
-        name: string;
-        type: "string" | "bool";
-        value: string | boolean;
-    }>;
+    properties?: Array<Property>;
+}
+
+interface Property {
+    name: string,
+    type: "string" | "bool",
+    value: string | boolean
 }
 
 export interface MapJson {
@@ -23,6 +27,8 @@ export interface MapJson {
     width: number
 
     layers: Array<ILayer>
+
+    properties: Array<Property>
 
     tilesets: Array<{
         columns: number;
@@ -37,5 +43,10 @@ export interface MapJson {
         tileheight: number;
         tilewidth: number;
         transparentcolor: string;
+
+        tiles?: Array<{
+            id: number,
+            properties?: Array<Property>
+        }>
     }>
 }
