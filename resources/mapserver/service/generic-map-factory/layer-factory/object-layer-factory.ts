@@ -1,5 +1,5 @@
 import { ILayer } from '../../map';
-import { LayerFactory } from './layer-factory';
+import type { LayerFactory } from './layer-factory';
 
 export class ObjectLayerFactory {
 
