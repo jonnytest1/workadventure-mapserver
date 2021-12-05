@@ -1,5 +1,6 @@
-import { FriendshipService } from './friendship-service'
-import { UserService } from "./user-service"
+import { FriendshipService } from './friendship-service';
+import { MinesweeperService } from './minesweeper-service';
+import { UserService } from "./user-service";
 
 type MethodMap<T> = { [key in keyof T]: (...args: any) => any }
 
@@ -11,7 +12,7 @@ type methodTypes<T extends MethodMap<T>> = { [K in keyof T]: {
 
 
 
-export type messaging = methodTypes<UserService> & methodTypes<FriendshipService>
+export type messaging = methodTypes<UserService> & methodTypes<FriendshipService> & methodTypes<MinesweeperService>
 
 //export type messageParam<T extends keyof messaging> = messaging[T]["param"];
 

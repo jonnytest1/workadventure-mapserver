@@ -34,9 +34,6 @@ export function validateMap(mapJson: MapJson) {
 
     });
 
-
-
-
     errors.forEach(console.log);
     if (errors.length == 0) {
         return true;

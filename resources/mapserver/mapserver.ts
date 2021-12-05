@@ -154,9 +154,8 @@ export class Mapserver {
             .send(mapJson);
     }
 
-    @GET({ path: "minesweeper.json", attributes: { needsUser: true } })
-    async getMinesweeperMap(req: HttpRequest<User>, res: HttpResponse) {
-        const resolver = MinesweeperResolver.getMapResolver(req.user);
-        res.send(await resolver.buildMap());
+    @GET({ path: "minesweeper.json", attributes: { needsUser: false } })
+    async getPlainMinesweeperMap(req: HttpRequest<User>, res: HttpResponse) {
+        res.send(await new MinesweeperResolver(true).buildMap());
     }
 }

@@ -1,10 +1,21 @@
 import { Vector } from '../models/vector';
 import { User } from '../user/user';
-import { ILayer } from './map';
 import { LayerFactory } from './generic-map-factory/layer-factory/layer-factory';
-import { MapFactory } from './generic-map-factory/generic-map-factory';
-export class MinesweeperResolver extends MapFactory {
+import { GameMapMapFactory } from './generic-map-factory/game-map-map-factory';
+import { Position } from '../../../public/users';
 
+interface GameTileState {
+    value: number
+
+    uncovered?: boolean
+
+    iterated?: boolean
+}
+
+//@ts-ignore
+type TileDescriptorArray = Parameters<import("../../../../jonny-maps/scripts/index").WorkAdventureApi["room"]["setTiles"]>["0"]
+
+export class MinesweeperResolver extends GameMapMapFactory<GameTileState> {
 
     static readonly mapWidth = 32
 
@@ -12,8 +23,19 @@ export class MinesweeperResolver extends MapFactory {
 
     static userGameMap: Record<string, MinesweeperResolver> = {}
 
-    private mineMap: { value: number, uncovered?: boolean }[][] = [];
-
+    public lostGame: boolean
+    constructor(plain = false) {
+        super();
+        if (!plain) {
+            this.forEachPosition(position => {
+                const rnd = Math.random();
+                if (rnd > 0.9) {
+                    this.setPosition(position, -10);//negative means bomb even if its falsely incremented 9 times its still negative
+                    this.incrementArea(position);
+                }
+            });
+        }
+    }
     getMapSize(): Vector {
         return MinesweeperResolver.bounds;
     }
@@ -21,23 +43,115 @@ export class MinesweeperResolver extends MapFactory {
         return [new Vector(16, 16)];
     }
 
-    constructor() {
-        super();
-        this.forEachPosition(position => {
-            if (!this.mineMap[position.lat]) {
-                this.mineMap[position.lat] = new Array(MinesweeperResolver.bounds.lon)
-                    .fill(null)
-                    .map(() => ({ value: 0 }));
-            }
-        });
-        this.forEachPosition(position => {
-            const rnd = Math.random();
-            if (rnd > 0.9) {
-                this.setPosition(position, -10);//negative means bomb even if its falsely incremented 9 times its still negative
-                this.incrementArea(position);
-            }
-        });
+    gameTileInitializer(): { value: number; } {
+        return { value: 0 };
     }
+    getUncovered() {
+        const uncovered: TileDescriptorArray = [];
+        this.forEachPosition(pos => {
+            const tileState = this.getPosition(pos);
+
+            uncovered.push(this.toTileDescriptor(pos, tileState));
+
+        });
+
+        return uncovered;
+    }
+
+    toTileDescriptor(pos: Vector, tile: GameTileState): TileDescriptorArray[0] {
+        return {
+            layer: this.getGameMapLayerName(),
+            tile: this.gameTileToIndex(tile),
+            ...pos.toPosition()
+        };
+    }
+
+
+    uncoverEmpty(startPos: Vector, collector: TileDescriptorArray) {
+        const stateTile = this.getPosition(startPos);
+        if (stateTile && !stateTile.iterated && !stateTile.uncovered && stateTile.value >= 0) {
+
+            stateTile.iterated = true;
+            stateTile.uncovered = true;
+
+            collector.push(this.toTileDescriptor(startPos, stateTile));
+            if (stateTile.value === 0) {
+                this.forAreaAround(vec => {
+                    this.uncoverEmpty(vec, collector);
+                }, startPos);
+            }
+        }
+
+    }
+
+    iterateBombs(startPos: Vector, collector: TileDescriptorArray) {
+        const stateTile = this.getPosition(startPos);
+        if (!stateTile.iterated && !stateTile.uncovered && stateTile.value < 0) {
+
+            stateTile.uncovered = true;
+            stateTile.iterated = true;
+            this.forAreaAround((vec, offsetVector) => {
+                if (this.getPosition(vec)) {
+                    let index = 0;
+                    if (offsetVector.lon == -2) {
+                        index = 25 + (offsetVector.lat / 2);
+                    } else if (offsetVector.lon == 2) {
+                        index = 71 + (offsetVector.lat / 2);
+                    } else if (offsetVector.lon == 0) {
+                        index = 48 + (offsetVector.lat / 2);
+                    }
+                    if (Math.floor(index) !== index || Math.abs(offsetVector.lon) == 1 || Math.abs(offsetVector.lat) == 1) {
+                        index = 48;
+                    }
+                    collector.push({
+                        layer: "hover-layer",
+                        tile: index,
+                        ...vec.toPosition()
+                    });
+                    this.iterateBombs(vec, collector);
+                }
+            }, startPos, 2);
+        }
+    }
+
+    uncover(position: Position) {
+        this.forEachPosition(pos => {
+            this.getPosition(pos).iterated = false;
+        });
+
+        const newTiles: TileDescriptorArray = [];
+
+        const startPos = new Vector(position.x, position.y);
+        this.uncoverEmpty(startPos, newTiles);
+
+        let state = "uncovered";
+        if (!newTiles.length) {
+            const stateTile = this.getPosition(startPos);
+            if (stateTile.value < 0) {
+                this.forEachPosition(pos => {
+                    this.getPosition(pos).iterated = false;
+                });
+                this.iterateBombs(startPos, newTiles);
+                this.forEachPosition(pos => {
+                    const state = this.getPosition(pos);
+                    if (state.value < 0) {
+                        newTiles.push(this.toTileDescriptor(pos, stateTile));
+                    }
+                });
+                state = "boom";
+                this.lostGame = true;
+            } else {
+                newTiles.push(this.toTileDescriptor(startPos, stateTile));
+            }
+        }
+
+        return {
+            state,
+            newTiles: newTiles
+        };
+    }
+
+
     incrementArea(position: Vector) {
         for (let offY = -1; offY <= 1; offY++) {
             for (let offX = -1; offX <= 1; offX++) {
@@ -50,16 +164,11 @@ export class MinesweeperResolver extends MapFactory {
         }
     }
 
-    forEachPosition(cb: ((pos: Vector) => void)) {
-        for (let y = 0; y < MinesweeperResolver.bounds.lat; y++) {
-            for (let x = 0; x < MinesweeperResolver.bounds.lon; x++) {
-                cb(new Vector(y, x));
-            }
-        }
-    }
-
     static getMapResolver(user: User) {
         MinesweeperResolver.userGameMap[user.id] = MinesweeperResolver.userGameMap[user?.id] || new MinesweeperResolver();
+        if (MinesweeperResolver.userGameMap[user.id].lostGame) {
+            MinesweeperResolver.userGameMap[user.id] = new MinesweeperResolver();
+        }
         return MinesweeperResolver.userGameMap[user.id];
     }
 
@@ -68,16 +177,13 @@ export class MinesweeperResolver extends MapFactory {
         positionObj.value = value;
     }
 
-    getPosition(position: Vector) {
-        return this.mineMap[position.lat]?.[position.lon];
-    }
 
     async buildMap() {
         await this.getMapJson(() => {
             this.addLayer(new LayerFactory()
                 .withName("background")
                 .withData(new Array(MinesweeperResolver.bounds.lat * MinesweeperResolver.bounds.lon).fill(117)));
-            this.addLayer(this.getGameLayer());
+            this.addLayer(this.gameMapLayer());
             this.addLayer(new LayerFactory()
                 .withName("hover-layer")
                 .withOpacity(0.4)
@@ -90,28 +196,24 @@ export class MinesweeperResolver extends MapFactory {
 
         return JSON.stringify(this.mapJson);
     }
+    gameTileToIndex(tile: GameTileState): number {
+        const value = tile.value;
+        if (!tile.uncovered) {
+            return 93;
+        }
 
-    getGameLayer(): ILayer {
-        const dataArray = new Array(MinesweeperResolver.bounds.lat * MinesweeperResolver.bounds.lon);
-
-        this.forEachPosition(pos => {
-            const value = this.getPosition(pos).value;
-            if (value < 0) {
-                dataArray[pos.toArrayIndex(this.mineMap)] = 27; // mine tile
-            } else if (value === 0) {
-                dataArray[pos.toArrayIndex(this.mineMap)] = 0;
-            } else {
-                dataArray[pos.toArrayIndex(this.mineMap)] = 80 + value; // numbers
-            }
-
-        });
-
-
-        return new LayerFactory().withData(dataArray).withName("minesweepermap").toJson();
+        if (value < 0) {
+            return 27; // mine tile
+        } else if (value === 0) {
+            return 31; // some planks indicating no danger
+        } else {
+            return 80 + value; // numbers
+        }
     }
 
+
     toString() {
-        return this.mineMap
+        return this.gameMap
             .map(line => line
                 .map(el => el.value).join(",")
             ).join("\n");

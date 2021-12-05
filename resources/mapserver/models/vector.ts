@@ -98,4 +98,11 @@ export class Vector {
         }
         return rootArray.length * this.lat + this.lon;
     }
+
+    toPosition() {
+        return {
+            x: this.lat,
+            y: this.lon
+        };
+    }
 }
