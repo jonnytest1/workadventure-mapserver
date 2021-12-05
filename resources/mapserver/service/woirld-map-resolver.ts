@@ -211,7 +211,7 @@ export class MapResolver extends MapAttributes {
             new Vector(this.layerAmount - 1, 0),
             this.indexPerTile.subtract(1, 0).withLon(0),
             4
-        )
+        );
 
         if (previousZoom >= MapResolver.worldZoom) {
             const amountOfIndicesInPreviousZoom = MapResolver.getAmountOfIndicesForZoom(previousZoom);
@@ -254,8 +254,8 @@ export class MapResolver extends MapAttributes {
     arrayWithTileAt(tilePos: Vector, indexPos: Vector, index: number) {
         const layerArray = Array(this.completeIndexArraySize)
             .fill(0);
-        const arrayPos = this.toIndex(tilePos.lat, tilePos.lon, indexPos.lat, indexPos.lon)
-        layerArray[arrayPos] = index
+        const arrayPos = this.toIndex(tilePos.lat, tilePos.lon, indexPos.lat, indexPos.lon);
+        layerArray[arrayPos] = index;
         return layerArray;
     }
 

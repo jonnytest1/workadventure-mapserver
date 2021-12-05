@@ -19,7 +19,7 @@ updateDatabase(__dirname + '/resources')
                 app.use(cookieParser());
                 app.use(async (req: HttpRequest<User>, res, next) => {
                     if (req.path == "/rest/users") {
-                        next()
+                        next();
                         return;
                     }
 
@@ -35,7 +35,7 @@ updateDatabase(__dirname + '/resources')
                             attributes: 'TRUE=TRUE',
                             inventory: 'TRUE=TRUE'
                         }
-                    }
+                    };
 
                     if (req.attributes?.needsUser !== false) {
 
@@ -48,7 +48,7 @@ updateDatabase(__dirname + '/resources')
                         }
                         if (!req.user && !req.cookies.user && req.query.pusheruuid) {
                             try {
-                                req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings)
+                                req.user = await load(User, `pusherUuid = ?`, [`${req.query.pusheruuid}`], deepSettings);
                                 if (req.user) {
                                     res.cookie('user', req.user.cookie, {
                                         expires: new Date(Date.now() + (1000 * 60 * 60 * 24 * 400)),
@@ -62,8 +62,8 @@ updateDatabase(__dirname + '/resources')
                             }
                         }
                         if (!req.user && !req.cookies.user) {
-                            if (req.method !== 'GET' && req.method !== 'HEAD' || req.path.endsWith('/message.html')) {
-                                console.log(`createing new user at ${req.path} with ${req.method}`)
+                            if (req.method !== 'GET' && req.method !== 'HEAD' || req.path.endsWith('/message.html') || req.attributes?.needsUser == true) {
+                                console.log(`createing new user at ${req.path} with ${req.method}`);
                                 req.user = new User(uuid());
                                 await save(req.user);
                                 res.cookie('user', req.user.cookie, {
@@ -86,7 +86,7 @@ updateDatabase(__dirname + '/resources')
                             }
                         }
                     } else {
-                        console.log("doesnt need user")
+                        console.log("doesnt need user");
                     }
                     next();
                 });

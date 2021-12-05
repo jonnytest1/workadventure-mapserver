@@ -40,7 +40,7 @@ export class MessageCommunciation {
     }
 
     static hasUsers() {
-        return !!Object.keys(this.websockets).length
+        return !!Object.keys(this.websockets).length;
     }
 
     static sendToUserById(userId: number, message: any): boolean {
@@ -69,7 +69,7 @@ export class MessageCommunciation {
         for (let i in MessageCommunciation.websockets) {
             if (MessageCommunciation.websockets[i].pusherUuid === pusherId) {
                 ws = MessageCommunciation.websockets[i].ws;
-                break
+                break;
             }
         }
         if (!ws) {
@@ -101,7 +101,7 @@ export class MessageCommunciation {
             try {
                 if (message == "connectioncheck") {
                     ws.send("connection");
-                    return
+                    return;
                 }
                 console.log('received', message);
                 const data = JSON.parse(message);

@@ -5,7 +5,7 @@ import { dirname, join } from 'path';
 import { GeoLocation } from '../models/location';
 import { Tile } from '../models/tile';
 import { MapResolver } from './woirld-map-resolver';
-const fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response> = require('node-fetch');
+import fetch from "node-fetch";
 
 const origins = ['a', 'b', 'c'];
 
@@ -17,12 +17,12 @@ export class ImageResolver {
     }
 
     static async loadTileData(tempTile: Tile): Promise<Tile> {
-        const paths = [__dirname, '../../../public/tiles', tempTile.zoom, `${tempTile.x}-${tempTile.y}.png`]
+        const paths = [__dirname, '../../../public/tiles', tempTile.zoom, `${tempTile.x}-${tempTile.y}.png`];
         const resource = join(...paths);
         try {
             const buffer = await promises.readFile(resource);
-            tempTile.data = buffer
-            return tempTile
+            tempTile.data = buffer;
+            return tempTile;
         } catch (e) {
             let loadedTile = await load(Tile, t => {
                 t.zoom = tempTile.zoom;
@@ -33,7 +33,7 @@ export class ImageResolver {
 
             if (loadedTile) {
                 if (!existsSync(dirname(resource))) {
-                    await promises.mkdir(dirname(resource))
+                    await promises.mkdir(dirname(resource));
                 }
                 promises.writeFile(resource, Buffer.from(loadedTile.data));
                 return loadedTile;

@@ -1,7 +1,6 @@
 import { Address } from '../resources/mapserver/models/address';
 import { GeoLocation } from '../resources/mapserver/models/location';
 import { TilePixel } from '../resources/mapserver/models/tile-pixel';
-import { AddressResolver } from '../resources/mapserver/service/address-from-geo';
 
 describe('test', () => {
 
@@ -25,4 +24,7 @@ describe('test', () => {
         console.log(pr);
 
     });
+
+
+
 });

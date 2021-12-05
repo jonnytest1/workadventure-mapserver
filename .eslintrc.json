@@ -2,30 +2,28 @@
   "$schema": "http://json.schemastore.org/eslintrc",
   "env": {
     "browser": true,
-    "es6": true
+    "es6": true,
+    "node": true
   },
   "extends": "eslint:recommended",
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
-  "ecmaFeatures": {},
   "settings": {},
   "plugins": [
-    "jsdoc",
-    "https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.js"
+    "unused-imports",
+    "@typescript-eslint"
   ],
-  "parserOptions": {
-    "ecmaVersion": 2018
-  },
+  "parser": "@typescript-eslint/parser",
   "rules": {
-    "no-unused-vars": 1,
-    "semi": 2,
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "semi": "warn",
     "no-debugger": 0,
     "no-console": 0,
     "no-global-assign": 0,
-    "function-paren-newline": [
-      "never"
-    ]
+    "unused-imports/no-unused-imports": "warn"
   }
 }
