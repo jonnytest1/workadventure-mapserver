@@ -1,4 +1,4 @@
-import * as fetch from "node-fetch"
+import * as fetch from "node-fetch";
 
 
 declare global {
@@ -8,4 +8,4 @@ declare global {
         }
     }
 }
-global.fetch = fetch
+global.fetch = fetch as unknown as typeof global.fetch;
