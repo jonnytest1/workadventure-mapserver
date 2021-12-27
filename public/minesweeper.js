@@ -2,7 +2,8 @@
 
 scriptNesting(Promise.all([
     WA.room.getTiledMap(),
-    require("./minesweeper-local"), //@jonnygithub/backend-connection
+    // require("@jonnygithub/backend-connection"),
+    require("./minesweeper-local"),
     WA.onInit()]),
     async (imports) => {
         const [map, { message }] = await imports;
@@ -34,10 +35,10 @@ scriptNesting(Promise.all([
                     message: "you lost :(",
                     type: "warning",
                     callback: async () => {
-                        const initialEvents = await message({
+                        const initEvents = await message({
                             type: "initialise"
                         });
-                        WA.room.setTiles(initialEvents);
+                        WA.room.setTiles(initEvents);
                     }
                 });
             } else if(response.state == "won") {
@@ -45,10 +46,10 @@ scriptNesting(Promise.all([
                     message: "you won \\o/",
                     type: "warning",
                     callback: async () => {
-                        const initialEvents = await message({
+                        const initEvents = await message({
                             type: "initialise"
                         });
-                        WA.room.setTiles(initialEvents);
+                        WA.room.setTiles(initEvents);
                     }
                 });
             }
