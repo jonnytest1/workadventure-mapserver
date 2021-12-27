@@ -218,7 +218,7 @@ module.exports = exportNesting([], () => {
             this.uncoverEmpty(startPos, newTiles);
 
             /**
-             * @type {"boom"|"uncovered"}
+             * @type {"boom"|"uncovered"|"won"}
              */
             let state = "uncovered";
             if(!newTiles.length) {
@@ -239,6 +239,17 @@ module.exports = exportNesting([], () => {
                 } else {
                     newTiles.push(this.toTileDescriptor(startPos, stateTile));
                 }
+            }
+            let foundHiddenBomb = false;
+            this.forEachPosition(pos => {
+                const data = this.getPosition(pos);
+                if(data.value < 0 && !data.uncovered) {
+                    foundHiddenBomb = true;
+                }
+            });
+
+            if(!foundHiddenBomb) {
+                state = "won";
             }
 
             return {
@@ -301,6 +312,11 @@ module.exports = exportNesting([], () => {
             }
         }
 
+        /**
+         * 
+         * @param {*} position 
+         * @returns {GameTileState}
+         */
         getPosition(position) {
             return this.gameMap[position.lat]?.[position.lon];
         }
@@ -393,7 +409,7 @@ module.exports = exportNesting([], () => {
      *     uncover:{
      *        data:Position,
      *        returnV:{
-     *           state:"boom"|"uncovered",
+     *           state:"boom"|"uncovered"|"won",
      *           newTiles: TileDescriptorArray
      *        }
      *     }
