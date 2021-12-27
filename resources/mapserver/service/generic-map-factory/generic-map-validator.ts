@@ -12,9 +12,7 @@ export function validateMap(mapJson: MapJson) {
     const usedIndexes = new Set();
 
     mapJson.layers.forEach(layer => {
-        layer.data.forEach(index => {
-            usedIndexes.add(index);
-        });
+
         if (nameMap[layer.name]) {
             errors.push(`duplicate layer name: ${layer.name} this will error`);
         }
@@ -30,6 +28,9 @@ export function validateMap(mapJson: MapJson) {
                 errors.push("phaser assumes objects is defined");
             }
         } else {
+            layer.data.forEach(index => {
+                usedIndexes.add(index);
+            });
             if (layerLength == null) {
                 layerLength = layer.data.length;
             } else if (layerLength !== layer.data.length) {
@@ -40,8 +41,11 @@ export function validateMap(mapJson: MapJson) {
     });
 
     usedIndexes.forEach(usedIndex => {
+        if (usedIndex === 0) {
+            return;
+        }
         for (const tileset of mapJson.tilesets) {
-            if (tileset.firstgid < usedIndex && usedIndex < (tileset.firstgid + tileset.tilecount)) {
+            if (tileset.firstgid <= usedIndex && usedIndex < (tileset.firstgid + tileset.tilecount)) {
                 return;
             }
         }
