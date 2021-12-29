@@ -3,6 +3,12 @@ feaures provided in this server:
 
 - generate Maps on the fly from openstreetmap  [MapGeneration](./resources/mapserver/mapserver.ts)
   - register your own site at [Register Page](https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/register.html)
+  - will skip zoom levels if there are is only one site linked
+  - zoom out in the bottom left
+  - will clear cache upon new site registration
+  - exitUrl to get back to main map : "https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/rest/mapserver/site.json"
+  - or take the url from where you jumped off(though that may change when new sites get generated)
+  
 - identify the current user and store properties [UserHandling](./index.ts)
 - communicate with the user [UserCommunication](./resources/mapserver/message-communication/user-service.ts)
 - item pickup [Items](resources\mapserver\user\inventory\inventory-item-activation.ts)
