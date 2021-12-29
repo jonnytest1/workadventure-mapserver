@@ -9,6 +9,7 @@ feaures provided in this server:
   - ability to make friends with someone (theres a special area where if both people are in at the same time they become friends) 
     - [Friendship](./resources/mapserver/user/friendship.ts)
     - [Becoming Friends](./resources/mapserver/message-communication/friendship-service.ts)
+    - [frontend map](https://github.com/jonnytest1/workadventuremap/blob/master/scripts/church.js)
   - ability to enable an overlay on any of my maps that can [https://github.com/jonnytest1/workadventuremap/tree/master/scripts/game/overlay/mapoverlay]
     - teleport to friends 
     - show a compass to friends
