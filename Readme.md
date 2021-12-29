@@ -33,4 +33,8 @@ feaures provided in this server:
     - utility scripts for pupups 
       - [zoned-popup](https://github.com/jonnytest1/workadventuremap/tree/master/scripts/zoned-popup.js)
       - and on top of that [an ENTIRE BOT TREE](https://github.com/jonnytest1/workadventuremap/tree/master/scripts/conversation.js)
-    - 
+
+- also minesweeper
+  - [frontend code](public\minesweeper.js)
+  - [backend code](resources/mapserver/message-communication/minesweeper-service.ts)
+  - [and just for fun the backend code as frontend code](public/minesweeper-local.js) this way it can actually be used without backend (minor adjustments may need to be made depending on your map and tilesets)
