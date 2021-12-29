@@ -2,6 +2,7 @@ feaures provided in this server:
 
 
 - generate Maps on the fly from openstreetmap  [MapGeneration](./resources/mapserver/mapserver.ts)
+  - register your own site at [Register Page](https://pi4.e6azumuvyiabvs9s.myfritz.net/mapserver/register.html)
 - identify the current user and store properties [UserHandling](./index.ts)
 - communicate with the user [UserCommunication](./resources/mapserver/message-communication/user-service.ts)
 - item pickup [Items](resources\mapserver\user\inventory\inventory-item-activation.ts)
