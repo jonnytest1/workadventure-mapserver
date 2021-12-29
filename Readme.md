@@ -11,4 +11,6 @@ feaures provided in this server:
     - teleport to friends
     - show a compass to friends
     - message friends accross maps
+    - teleport to your users personal map
+  - customize your users personal map at will (you can pick up "tiles" at chests after completing challenges (currently no pay to win :D ))
   
