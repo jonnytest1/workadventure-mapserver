@@ -34,8 +34,8 @@ export class Mapserver {
         if (req.body.icon && typeof req.body.icon === 'number') {
             site.iconIndex = req.body.icon;
         }
-        const location = site.getLocation();
-        site.address = await Mapserver.addressResolver.getAddressFromGeo(location);
+        //const location = site.getLocation();
+        // site.address = await Mapserver.addressResolver.getAddressFromGeo(location);
         await save(site);
         new DataBaseBase().sqlquery('DELETE FROM mapcache');
 
@@ -50,6 +50,7 @@ export class Mapserver {
             };
             console.log('set country');
         }*/
+
     }
 
     @GET({ path: '', attributes: { needsUser: false } })

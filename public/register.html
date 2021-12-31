@@ -4,42 +4,51 @@
 
     </head>
 
-    <body>
+    <body style="background-image: url(./background.png);background-size: 100% 100%;">
         <form id="registerForm"
               method="POST"
               action="">
-            <table>
+            <table style="background: #0e101e59;color: white;">
 
                 <tr>
                     <td>
                         <input name="url"
+                               placeholder="map url"
                                style="min-width: 600px;">
                     </td>
                     <td>
-                        url auf die jeweilige map
-                        Bsp "/_/global/alexbrandad.github.io/testmap-gh-pages-first-test/openbas.json"
+                        url to your corresponding map
+                        example "https://jonnytest1.github.io/workadventuremap/map.json#starthaus"
 
                     </td>
                 </tr>
                 <tr>
                     <td>
+                        <br>
+                        coordinates where you want your exit to be:
+                    </td>
+                </tr>
+                <tr>
+                    <td>
                         <input name="lat"
+                               placeholder="latitude"
                                style="min-width: 600px;">
                     </td>
                     <td>
-                        Bsp 49.47021 kann unter <a
-                           href="https://www.latlong.net/convert-address-to-lat-long.html">LatLong.net</a> aus einer
-                        addresse errechnet werden
+                        example 49.47021 can be calculated at <a
+                           href="https://www.latlong.net/convert-address-to-lat-long.html">LatLong.net</a> from some
+                        address (no need (discouraged) to put your private address :D)
                     </td>
 
                 </tr>
                 <tr>
                     <td>
                         <input name="lon"
+                               placeholder="longitude"
                                style="min-width: 600px;">
                     </td>
                     <td>
-                        Bsp 10.99243
+                        example 10.99243
                     </td>
                 </tr>
                 <tr>
@@ -47,7 +56,7 @@
 
                     </td>
                     <td>
-                        <button type="submit">register url at position</button>
+                        <button type="submit">register url at above position</button>
                     </td>
                 </tr>
             </table>
