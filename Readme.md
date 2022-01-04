@@ -12,7 +12,7 @@ feaures provided in this server:
 - identify the current user and store properties [UserHandling](./index.ts)
 - communicate with the user [UserCommunication](./resources/mapserver/message-communication/user-service.ts)
 - item pickup [Items](resources\mapserver\user\inventory\inventory-item-activation.ts)
-  - [customizing user(add items/reset with death count)](https://github.com/jonnytest1/workadventuremap/tree/master/scripts)\fire.js)
+  - [customizing user(add items/reset with death count)](https://github.com/jonnytest1/workadventuremap/tree/master/scripts/fire.js)
 
 - hidden behind "gamemode" property: [GameMode](./resources/mapserver/user/user.ts#User.gameModeEnabled)
       - [enable gamemode](https://github.com/jonnytest1/workadventuremap/tree/master/scripts/game-mode.js)
@@ -21,7 +21,7 @@ feaures provided in this server:
     - [Becoming Friends](./resources/mapserver/message-communication/friendship-service.ts)
     - [frontend map](https://github.com/jonnytest1/workadventuremap/blob/master/scripts/church.js)
   
-  - ability to enable an overlay on any of my maps that can [https://github.com/jonnytest1/workadventuremap/tree/master/scripts/game/overlay/mapoverlay](map overlay)
+  - ability to enable an overlay on any of my maps that can [map overlay](https://github.com/jonnytest1/workadventuremap/tree/master/scripts/game/overlay/mapoverlay)
     - teleport to friends 
     - show a compass to friends
     - message friends accross maps
