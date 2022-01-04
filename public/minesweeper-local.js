@@ -10,7 +10,7 @@
  * 
  * @typedef {Parameters<import("../../jonny-maps/scripts/index").WorkAdventureApi["room"]["setTiles"]>["0"] } TileDescriptorArray
  */
-module.exports = exportNesting([], () => {
+module.exports = window.exportNesting([], () => {
 
     class Vector {
 
