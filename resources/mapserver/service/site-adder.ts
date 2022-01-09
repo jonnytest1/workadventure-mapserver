@@ -70,6 +70,9 @@ export class SitesAdder extends MapAttributes {
                 while ([...this.getSiteMapForZoom(newZoom, pixelSites)
                     .keys()].length === 1) {
                     newZoom += MapResolver.zoomIncrement;
+                    if (newZoom > 18) {
+                        break;
+                    }
                 }
                 newZoom = Math.min(18, newZoom);
 
