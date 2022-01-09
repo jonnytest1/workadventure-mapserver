@@ -20,6 +20,10 @@ like always first run:
         - process.env.DB_URL;
         - process.env.DB_PASSWORD;
 
+## environment variables
+    - you can use dotenv in the root directory 
+    - or specify them in the process environment
+
 you can start the server with 
 
 
