@@ -21,15 +21,15 @@ export class ApiProxy {
     private static pusherIdCache = new MemoryCache<string>({
         duration: 1000 * 60 * 60,
         multipleGenerator: async pusherUuids => {
-            console.log("fetching pusherUuids")
+            console.log("fetching pusherUuids");
             const queryResult = await new DataBaseBase()
                 .selectQuery<{ pusherUuid: string, referenceUuid: string }>('SELECT referenceUuid,pusherUuid FROM user WHERE `pusherUuid` IN (?)', [pusherUuids]);
 
-            const tempMap = {}
+            const tempMap = {};
             queryResult.forEach(result => {
-                tempMap[result.pusherUuid] = result.referenceUuid
-            })
-            return tempMap
+                tempMap[result.pusherUuid] = result.referenceUuid;
+            });
+            return tempMap;
         }
     })
 
@@ -38,13 +38,13 @@ export class ApiProxy {
     fetchAnyways: number = 1
 
     constructor() {
-        this.userDumpLoop()
+        this.userDumpLoop();
     }
 
     async userDumpLoop() {
         try {
             if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
-                const response = await fetch('https://workadventure-api.brandad-systems.de/dump?token=' + process.env.ADMIN_API_KEY);
+                const response = await fetch(`https://${process.env.API_ORIGIN}/dump?token=${process.env.ADMIN_API_KEY}`);
                 ApiProxy.apiCache = await response.json();
                 await MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
                     const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
@@ -57,18 +57,18 @@ export class ApiProxy {
                         data: apiUsers
                     };
                 });
-                this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1
+                this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1;
             }
             //fetching every 10 minutes anyways
             if (this.fetchAnyways < (60 * 10)) {
-                this.fetchAnyways = 1
+                this.fetchAnyways = 1;
             }
         } catch (e) {
-            console.error(e)
+            console.error(e);
         }
         setTimeout(() => {
             this.userDumpLoop();
-        }, 10000)
+        }, 10000);
     }
 
     async getAllUsersForPusherId(pusherId: string) {
@@ -113,8 +113,8 @@ export class ApiProxy {
         const keyMap = await ApiProxy.pusherIdCache.getAll(pusherKeys);
 
         pusherKeys.forEach(pusherKey => {
-            userObjectMap.get(pusherKey).userRefereneUuid = keyMap[pusherKey]
-        })
+            userObjectMap.get(pusherKey).userRefereneUuid = keyMap[pusherKey];
+        });
 
         if (!containsIds) {
             userObjectMap.forEach(uO => {
@@ -169,7 +169,7 @@ export class ApiProxy {
 
         if (!(map.layers instanceof Array)) {
             console.log('layers is no array');
-            return null
+            return null;
         }
         for (const layer of map.layers) {
             if (!layer.properties && layer.type !== "group") {
@@ -209,7 +209,7 @@ export class ApiProxy {
             for (const subLayer of layer.layers) {
                 const jitsiName = this.getJitsiNameFromLayer(subLayer, playerX, playery);
                 if (jitsiName) {
-                    return jitsiName
+                    return jitsiName;
                 }
             }
         }
