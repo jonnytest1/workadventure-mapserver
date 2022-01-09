@@ -4,12 +4,13 @@ import { Address } from '../models/address';
 import { BoundingBox } from '../models/bounding-box';
 import { GeoLocation } from '../models/location';
 import { assignDeclaredProperties } from './json-assign';
+import { MapAttributes } from './map-attributes-holder';
 
 const fetch = require('node-fetch');
 export class AddressResolver {
 
     async getAddressFromGeo(location: GeoLocation): Promise<Address> {
-        const data = await this.getData(location, 18);
+        const data = await this.getData(location, MapAttributes.maxZoom);
         return assignDeclaredProperties(Address, data.address);
     }
 

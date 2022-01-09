@@ -70,11 +70,11 @@ export class SitesAdder extends MapAttributes {
                 while ([...this.getSiteMapForZoom(newZoom, pixelSites)
                     .keys()].length === 1) {
                     newZoom += MapResolver.zoomIncrement;
-                    if (newZoom > 18) {
+                    if (newZoom > SitesAdder.maxZoom) {
                         break;
                     }
                 }
-                newZoom = Math.min(18, newZoom);
+                newZoom = Math.min(SitesAdder.maxZoom, newZoom);
 
                 const targetSite = exampleSite.getLocation()
                     .toTilePixel(newZoom)

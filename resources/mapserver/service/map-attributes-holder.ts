@@ -10,6 +10,8 @@ export class MapAttributes {
 
     static readonly startTileIndex = 374;  //tile:1
 
+    static readonly maxZoom = 18
+
     constructor() {
         //TODO
     }

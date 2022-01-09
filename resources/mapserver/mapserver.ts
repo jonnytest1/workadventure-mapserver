@@ -129,7 +129,7 @@ export class Mapserver {
             return;
         }
         let zoom = +req.params.zoom;
-        if (zoom > 18) {
+        if (zoom > SitesAdder.maxZoom) {
             throw new ResponseCodeError(400, "zoom level too high");
         }
 
