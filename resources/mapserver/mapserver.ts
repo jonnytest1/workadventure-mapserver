@@ -29,7 +29,19 @@ export class Mapserver {
         if (isNaN(+req.body.lat) || isNaN(+req.body.lon)) {
             throw new ResponseCodeError(400, 'positions need to be a number');
         }
-        const site = new Site(req.body.url, new GeoLocation(+req.body.lat, +req.body.lon));
+        const latitude = +req.body.lat;
+        if (latitude > 85 || latitude < -85) {
+            throw new ResponseCodeError(400, 'latitudes greater than 85 or smaller than -85 are not within the map');
+        }
+
+        let siteUrl: URL;
+        try {
+            siteUrl = new URL(req.body.url);
+        } catch (e) {
+            throw new ResponseCodeError(400, 'url needs to be a valid url pointing to a map.json');
+        }
+
+        const site = new Site(siteUrl.href, new GeoLocation(+req.body.lat, +req.body.lon));
 
         if (req.body.icon && typeof req.body.icon === 'number') {
             site.iconIndex = req.body.icon;

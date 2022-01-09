@@ -93,7 +93,7 @@ export class SitesAdder extends MapAttributes {
     }
 
     getFirstTilePixelWithMultipleSites(sites: Array<Site>) {
-        let newZoom = this.zoom + MapResolver.zoomIncrement;
+        let newZoom = this.zoom;
 
         while ([...this.getSiteMapForZoom(newZoom, sites)
             .keys()].length === 1) {
