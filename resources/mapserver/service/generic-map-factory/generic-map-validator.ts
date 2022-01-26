@@ -34,7 +34,7 @@ export function validateMap(mapJson: MapJson) {
             if (layerLength == null) {
                 layerLength = layer.data.length;
             } else if (layerLength !== layer.data.length) {
-                errors.push(`layer with different length ${layer.data.length} compared to ${layerLength}`);
+                errors.push(`layer ${layer.name} with different length ${layer.data.length} compared to ${layerLength}`);
             }
         }
 
