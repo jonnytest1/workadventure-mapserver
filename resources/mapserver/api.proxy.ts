@@ -44,23 +44,34 @@ export class ApiProxy {
     async userDumpLoop() {
         try {
             if (this.fetchAnyways > 0 || MessageCommunciation.hasUsers()) {
+                if (!process.env.API_ORIGIN) {
+                    console.log("API_ORIGIN not defined");
+                    return;
+                }
                 const response = await fetch(`https://${process.env.API_ORIGIN}/dump?token=${process.env.ADMIN_API_KEY}`);
-                ApiProxy.apiCache = await response.json();
-                await MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
-                    const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
-                    if (apiUsers.length <= 1) {
-                        return null;
-                    }
+                if (response.status !== 200) {
+                    console.log("response status for api call:" + response.status);
+                    this.fetchAnyways--;
 
-                    return {
-                        type: 'positionUpdate',
-                        data: apiUsers
-                    };
-                });
-                this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1;
+                } else {
+                    ApiProxy.apiCache = await response.json();
+                    await MessageCommunciation.sendForAllUsersByPusherId(async pusherUuid => {
+                        const apiUsers = await this.getAllUsersForPusherId(pusherUuid);
+                        if (apiUsers.length <= 1) {
+                            return null;
+                        }
+
+                        return {
+                            type: 'positionUpdate',
+                            data: apiUsers
+                        };
+                    });
+                    this.fetchAnyways = MessageCommunciation.hasUsers() ? 10 : this.fetchAnyways - 1;
+                }
+
             }
             //fetching every 10 minutes anyways
-            if (this.fetchAnyways < (60 * 10)) {
+            if (this.fetchAnyways < (60 * -10)) {
                 this.fetchAnyways = 1;
             }
         } catch (e) {

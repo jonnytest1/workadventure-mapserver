@@ -34,8 +34,7 @@ you can start the server with
 ```
 
 
-example docker-compose 
-
+example docker-compose
 
 ```yaml
 version: '3'

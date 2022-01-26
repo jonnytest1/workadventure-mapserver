@@ -10,6 +10,7 @@ import { Tile } from './models/tile';
 import { AddressResolver } from './service/address-from-geo';
 import { ImageResolver } from './service/image-resolver';
 import { MapAttributes } from './service/map-attributes-holder';
+import { MappingWorldMapResovler } from './service/mapping-world-map-resolver';
 import { MinesweeperResolver } from './service/minesweeper';
 import { SitesAdder } from './service/site-adder';
 import { UserMapLoader } from './service/user-map-loader';
@@ -122,6 +123,7 @@ export class Mapserver {
                 .send(worldMapJsonString);
             return;
         }
+
         const sites = await load(Site, 'TRUE=TRUE', undefined, {
             deep: true
         });
@@ -132,7 +134,28 @@ export class Mapserver {
         res.set('Content-Type', 'application/json')
             .send(topLevelJsonString);
     }
+    @GET({ path: 'replsite.json', attributes: { needsUser: false } })
+    @GET({ path: '/world/replsite.json', attributes: { needsUser: false } })
+    async getRenderedReplSite(req: HttpRequest, res) {
+        if (req.path.includes('/world/replsite.json')) {
+            const worldMapJsonString = await new MappingWorldMapResovler().getWorldMapJson();
+            res.set('Content-Type', 'application/json')
+                .send(worldMapJsonString);
+            return;
+        }
 
+        const sites = await load(Site, 'TRUE=TRUE', undefined, {
+            deep: true
+        });
+
+        const pixel = new SitesAdder(new MappingWorldMapResovler()).getFirstTilePixelWithMultipleSites(sites);
+        //console.log(`${pixel.zoom} - ${pixel.lon} - ${pixel.lat}`);
+        const topLevelJsonString = await new MappingWorldMapResovler(pixel.zoom, pixel.lon, pixel.lat).getWorldMapJson();
+        res.set('Content-Type', 'application/json')
+            .send(topLevelJsonString);
+    }
+
+    @GET({ path: ':zoom/lat/:tileX/lon/:tileY/replsite.json', attributes: { needsUser: false } })
     @GET({ path: ':zoom/lat/:tileX/lon/:tileY/site.json', attributes: { needsUser: false } })
     async getRenderedSiteForPosition(req: HttpRequest, res: HttpResponse) {
         if (!req.params.zoom || isNaN(+req.params.zoom)) {
@@ -145,7 +168,11 @@ export class Mapserver {
             throw new ResponseCodeError(400, "zoom level too high");
         }
 
-        const mapReolver = new MapResolver(zoom, +req.params.tileX, +req.params.tileY, MapAttributes.layerSizePerMap);
+        let classRef = MapResolver;
+        if (req.path.includes("replsite.json")) {
+            classRef = MappingWorldMapResovler;
+        }
+        const mapReolver = new classRef(zoom, +req.params.tileX, +req.params.tileY, MapAttributes.layerSizePerMap);
         const worldMapJsonString = await mapReolver.getWorldMapJson();
         res.set('Content-Type', 'application/json')
             .send(worldMapJsonString);

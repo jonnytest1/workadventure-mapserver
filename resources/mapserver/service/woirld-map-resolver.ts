@@ -54,13 +54,13 @@ export class MapResolver extends MapAttributes {
 
     async getWorldMapJson() {
         let cache = await load(MapCache, c => {
-            c.layerStartLat = this.layerStart.lon;
+            c.layerStartLat = this.layerStart.lat;
             c.layerStartLon = this.layerStart.lon;
             c.zoom = this.zoom;
         }, undefined, { first: true });
         if (!cache) {
             cache = new MapCache();
-            cache.layerStartLat = this.layerStart.lon;
+            cache.layerStartLat = this.layerStart.lat;
             cache.layerStartLon = this.layerStart.lon;
             cache.zoom = this.zoom;
 
@@ -71,7 +71,11 @@ export class MapResolver extends MapAttributes {
         return cache.mapJson;
     }
 
-    private async generateWorldMapJson() {
+    protected async mapTile(startGid: number, bigX: number, bigY: number, tileColumn: number, tileRow: number) {
+        return startGid + (tileColumn * this.indexPerTile.lat + tileRow);
+    }
+
+    protected async generateWorldMapJson() {
         const buffer = await promises.readFile(`${__dirname}/resources/default-map.json`, { encoding: 'utf8' });
         this.defaultJson = JSON.parse(buffer);
         this.defaultJson.tilesets.length = 1;
@@ -96,26 +100,13 @@ export class MapResolver extends MapAttributes {
         for (let i = this.layerStart.lat; i < this.layerEnd.lat; i++) {
             for (let y = this.layerStart.lon; y < this.layerEnd.lon; y++) {
                 const tileCount = Math.pow(MapResolver.indexesPerTile, 2);
-                this.defaultJson.tilesets.push({
-                    columns: MapResolver.indexesPerTile,
-                    imageheight: MapAttributes.imageSize,
-                    imagewidth: MapAttributes.imageSize,
-                    image: `/image/${this.zoom}/${i}/${y}.png`,
-                    name: `tileset-${this.zoom}-${i}-${y}`,
-                    margin: 0,
-                    spacing: 0,
-                    tilecount: tileCount,
-                    tileheight: MapResolver.tileSize,
-                    tilewidth: MapResolver.tileSize,
-                    transparentcolor: '#fff',
-                    firstgid: startGid
-                });
+                this.addGeoImageTileset(i, y, tileCount, startGid);
                 for (let tileColumn = 0; tileColumn < this.indexPerTile.lat; tileColumn++) {
                     for (let tileRow = 0; tileRow < this.indexPerTile.lon; tileRow++) {
-                        const tileIndex = tileColumn * this.indexPerTile.lat + tileRow;
+                        const tileIndex = await this.mapTile(startGid, i, y, tileColumn, tileRow);
                         const dataIndex = this.toIndex(i, y, tileColumn, tileRow);
 
-                        dataArray[dataIndex - this.startIndex] = startGid + tileIndex;
+                        dataArray[dataIndex - this.startIndex] = tileIndex;
 
                     }
                 }
@@ -200,6 +191,23 @@ export class MapResolver extends MapAttributes {
         if (this.zoom === MapResolver.worldZoom) {
             MapResolver.worldMapJsonString = mapString;
         }
+    }
+
+    protected addGeoImageTileset(i: number, y: number, tileCount: number, startGid: number) {
+        this.defaultJson.tilesets.push({
+            columns: MapResolver.indexesPerTile,
+            imageheight: MapAttributes.imageSize,
+            imagewidth: MapAttributes.imageSize,
+            image: `image/${this.zoom}/${i}/${y}.png`,
+            name: `tileset-${this.zoom}-${i}-${y}`,
+            margin: 0,
+            spacing: 0,
+            tilecount: tileCount,
+            tileheight: MapResolver.tileSize,
+            tilewidth: MapResolver.tileSize,
+            transparentcolor: '#fff',
+            firstgid: startGid
+        });
     }
 
     private addZoomUpIcon() {

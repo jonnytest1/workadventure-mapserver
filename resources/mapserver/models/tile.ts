@@ -15,6 +15,9 @@ export class Tile {
     @column()
     zoom;
 
+    @column()
+    topo
+
     @column({
         size: 'large',
         transformations: {

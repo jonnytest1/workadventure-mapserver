@@ -98,6 +98,10 @@ export class SitesAdder extends MapAttributes {
         while ([...this.getSiteMapForZoom(newZoom, sites)
             .keys()].length === 1) {
             newZoom += MapResolver.zoomIncrement;
+            if (newZoom >= MapAttributes.maxZoom) {
+                newZoom = MapAttributes.maxZoom;
+                break;
+            }
         }
 
         return sites[0].getLocation()

@@ -11,13 +11,25 @@ const origins = ['a', 'b', 'c'];
 
 export class ImageResolver {
 
+
+
     static async getTileForPos(location: GeoLocation, zoom: number = MapResolver.worldZoom): Promise<Tile> {
         const tempTile = location.toTile(zoom);
         return this.loadTileData(tempTile);
     }
 
-    static async loadTileData(tempTile: Tile): Promise<Tile> {
-        const paths = [__dirname, '../../../public/tiles', tempTile.zoom, `${tempTile.x}-${tempTile.y}.png`];
+    static getUrl(tile: Tile, topo = false) {
+        const origin = origins[Math.floor(Math.random() * origins.length)];
+        let url = new URL(`https://${origin}.tile.openstreetmap.org`);
+        if (topo) {
+            url = new URL(`https://${origin}.tile.opentopomap.org`);
+        }
+        url.pathname = `${tile.zoom}/${tile.x}/${tile.y}.png`;
+        return url;
+    }
+
+    static async loadTileData(tempTile: Tile, topo = false): Promise<Tile> {
+        const paths = [__dirname, `../../../public/tiles${topo ? "topo" : ""}`, `${tempTile.zoom}`, `${tempTile.x}-${tempTile.y}.png`];
         const resource = join(...paths);
         try {
             const buffer = await promises.readFile(resource);
@@ -28,6 +40,9 @@ export class ImageResolver {
                 t.zoom = tempTile.zoom;
                 t.x = tempTile.x;
                 t.y = tempTile.y;
+                if (topo) {
+                    t.topo = 1;
+                }
                 return;
             }, undefined, { first: true });
 
@@ -39,20 +54,21 @@ export class ImageResolver {
                 return loadedTile;
             }
 
-            const origin = origins[Math.floor(Math.random() * origins.length)];
-            const url = new URL(`https://${origin}.tile.openstreetmap.org`);
-            url.pathname = `${tempTile.zoom}/${tempTile.x}/${tempTile.y}.png`;
+            let url = this.getUrl(tempTile, topo);
+
             console.log(url.href);
             const response = await fetch(url.href, {
                 headers: {
                     'User-Agent': 'NodeFetch/2.6.1'
                 }
             });
-            console.log(response.status);
             if (response.status !== 200) {
                 throw new ResponseCodeError(response.status, await response.text());
             }
             tempTile.data = await response.arrayBuffer();
+            promises.mkdir(dirname(resource), { recursive: true }).then(() => {
+                promises.writeFile(resource, Buffer.from(tempTile.data));
+            });
             save(tempTile);
             return tempTile;
         }

@@ -26,5 +26,11 @@ describe('test', () => {
     });
 
 
+    it('convert tile', () => {
+
+        const tile = new GeoLocation(48.864716, 2.349014).toTile(8);
+        expect(tile).toBeDefined();
+
+    });
 
 });
